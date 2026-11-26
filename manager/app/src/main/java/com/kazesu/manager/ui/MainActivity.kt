@@ -126,7 +126,11 @@ import com.kazesu.manager.ui.theme.DarkNightGlassToastHost
 import com.kazesu.manager.ui.theme.DarkNightScreenBackground
 import com.kazesu.manager.ui.component.DarkNightGlassSidebarOverlay
 import com.kazesu.manager.ui.component.LockedFeatureDialog
+import androidx.compose.material3.SnackbarHostState
 import com.kazesu.manager.ui.component.LockedFeatureScreen
+import com.kazesu.manager.ui.component.dialog.rememberLoadingDialog
+import com.kazesu.manager.ui.component.material.SendLogBottomSheet
+import com.kazesu.manager.ui.component.miuix.SendLogDialog
 import com.kazesu.manager.ui.util.DarkNightAccess
 import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import com.kazesu.manager.ui.component.DarkNightPillDock
@@ -921,11 +925,28 @@ fun MainScreen(
 
                     val toolsUnlocked = rememberDarkNightToolsUnlocked()
                     var showSidebarLockedDialog by remember { mutableStateOf(false) }
+                    var showSidebarSendLog by remember { mutableStateOf(false) }
+                    val sidebarSendLogSnackbar = remember { SnackbarHostState() }
+                    val sidebarSendLogLoading = rememberLoadingDialog()
+
                     if (showSidebarLockedDialog) {
                         LockedFeatureDialog(
                             onCheckDevice = { navController.push(Route.Install()) },
                             onDismiss = { showSidebarLockedDialog = false },
                         )
+                    }
+                    if (showSidebarSendLog) {
+                        when (uiMode) {
+                            UiMode.Material -> SendLogBottomSheet(
+                                onDismiss = { showSidebarSendLog = false },
+                                snackbarHostState = sidebarSendLogSnackbar,
+                            )
+                            UiMode.Miuix -> SendLogDialog(
+                                show = true,
+                                onDismissRequest = { showSidebarSendLog = false },
+                                loadingDialog = sidebarSendLogLoading,
+                            )
+                        }
                     }
 
                     DarkNightGlassSidebarOverlay(
@@ -941,10 +962,7 @@ fun MainScreen(
                         onOpenDarkTune = { navController.push(Route.Tune) },
                         onOpenToolbox = { navController.push(Route.DarkNightToolbox) },
                         onOpenThemeStudio = { navController.push(Route.ColorPalette()) },
-                        onOpenSendLogs = {
-                            if (toolsUnlocked) navController.push(Route.DarkNightToolbox)
-                            else showSidebarLockedDialog = true
-                        },
+                        onOpenSendLogs = { showSidebarSendLog = true },
                         onOpenAbout = { navController.push(Route.About) },
                         onExpandedChange = onSidebarExpandedChange,
                     )

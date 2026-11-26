@@ -1,5 +1,6 @@
 package com.kazesu.manager.ui.component
 
+import android.content.Context
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -69,13 +70,18 @@ import com.kazesu.manager.ui.theme.DarkNightGlassCard
 import com.kazesu.manager.ui.theme.DarkNightThemeStore
 import com.kazesu.manager.ui.theme.LocalDarkNightGlass
 import com.kazesu.manager.ui.theme.contrastOn
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import com.kazesu.manager.ui.util.BootImageExtractor
 import com.kazesu.manager.ui.util.CompatItem
+import com.kazesu.manager.ui.util.CompatOverrides
 import com.kazesu.manager.ui.util.CompatReport
 import com.kazesu.manager.ui.util.CompatSeverity
 import com.kazesu.manager.ui.util.DarkNightShare
+import com.kazesu.manager.ui.util.RecommendedMethod
 import com.kazesu.manager.ui.util.RootCompatChecker
 import com.kazesu.manager.ui.util.RootVerdict
+import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -441,20 +447,40 @@ fun BrickGuardDialog(
 /**
  * Primary Install screen glass card: Root Compatibility Check (Material & Miuix).
  */
+private const val COMPAT_PREFS = "darknight_compat"
+private const val KEY_OVR_BOOTLOADER = "cmp_ovr_bootloader"
+private const val KEY_OVR_VENDOR = "cmp_ovr_vendor"
+
+fun readSavedCompatOverrides(context: Context, isGki: Boolean? = null): CompatOverrides {
+    val prefs = context.getSharedPreferences(COMPAT_PREFS, Context.MODE_PRIVATE)
+    return CompatOverrides(
+        bootloaderUnlocked = prefs.getBoolean(KEY_OVR_BOOTLOADER, false),
+        vendorProtectionOff = prefs.getBoolean(KEY_OVR_VENDOR, false),
+        gki = isGki,
+    )
+}
+
 @Composable
 fun RootCompatCheckCard(
     rootAvailable: Boolean,
     onShowMessage: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isGkiDevice: Boolean? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val glass = LocalDarkNightGlass.current
     val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
     val report by RootCompatChecker.latest.collectAsStateWithLifecycle()
+    val toolsUnlocked = rememberDarkNightToolsUnlocked()
 
+    val prefs = remember(context) { context.getSharedPreferences(COMPAT_PREFS, Context.MODE_PRIVATE) }
     var running by remember { mutableStateOf(false) }
     var deepEnabled by remember { mutableStateOf(false) }
+    var overridesExpanded by remember { mutableStateOf(false) }
+    var ovrBootloader by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_BOOTLOADER, false)) }
+    var ovrVendor by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_VENDOR, false)) }
+    var manualRunOnRooted by remember { mutableStateOf(false) }
 
     LaunchedEffect(rootAvailable) {
         if (!rootAvailable) deepEnabled = false
@@ -502,6 +528,34 @@ fun RootCompatCheckCard(
                 }
             }
 
+            // Already rooted green glass banner (Part 3)
+            if (toolsUnlocked) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(VerdictGreen.copy(alpha = if (glass.isDark) 0.16f else 0.14f))
+                        .border(1.dp, VerdictGreen.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = VerdictGreen,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.cmp_already_rooted),
+                        color = glass.content,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
             // Deep check toggle
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -531,14 +585,103 @@ fun RootCompatCheckCard(
                 )
             }
 
+            // Collapsible "I know my device" overrides (Part 1)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(glass.surfaceHi.copy(alpha = 0.45f))
+                    .border(1.dp, glass.outline.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { overridesExpanded = !overridesExpanded }
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(R.string.cmp_override_title),
+                        color = glass.content,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Icon(
+                        imageVector = if (overridesExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = glass.contentSecondary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                AnimatedVisibility(visible = overridesExpanded) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.cmp_override_desc),
+                            color = glass.contentSecondary,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cmp_override_bootloader),
+                                color = glass.content,
+                                fontSize = 12.5.sp,
+                                modifier = Modifier.weight(1f),
+                            )
+                            DarkNightSwitch(
+                                checked = ovrBootloader,
+                                onCheckedChange = {
+                                    ovrBootloader = it
+                                    prefs.edit().putBoolean(KEY_OVR_BOOTLOADER, it).apply()
+                                },
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cmp_override_vendor),
+                                color = glass.content,
+                                fontSize = 12.5.sp,
+                                modifier = Modifier.weight(1f),
+                            )
+                            DarkNightSwitch(
+                                checked = ovrVendor,
+                                onCheckedChange = {
+                                    ovrVendor = it
+                                    prefs.edit().putBoolean(KEY_OVR_VENDOR, it).apply()
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
             // Run button
             Button(
                 onClick = {
                     if (!running) {
                         scope.launch {
                             running = true
+                            manualRunOnRooted = true
                             try {
-                                RootCompatChecker.run(deep = deepEnabled && rootAvailable)
+                                RootCompatChecker.run(
+                                    deep = deepEnabled && rootAvailable,
+                                    overrides = CompatOverrides(
+                                        bootloaderUnlocked = ovrBootloader,
+                                        vendorProtectionOff = ovrVendor,
+                                        gki = isGkiDevice,
+                                    ),
+                                )
                             } finally {
                                 running = false
                             }
@@ -565,9 +708,9 @@ fun RootCompatCheckCard(
                 }
             }
 
-            // Results
+            // Results (when already rooted, only expand detailed verdict after user taps Check)
             val currentReport = report
-            AnimatedVisibility(visible = currentReport != null) {
+            AnimatedVisibility(visible = currentReport != null && (!toolsUnlocked || manualRunOnRooted)) {
                 if (currentReport != null) {
                     val vColor = verdictColor(currentReport.verdict)
                     val sortedItems = remember(currentReport) {
@@ -610,6 +753,18 @@ fun RootCompatCheckCard(
                                 )
                             }
                         }
+
+                        // Recommended install method line (Part 2)
+                        val methodLabel = when (currentReport.recommended) {
+                            RecommendedMethod.LKM_PATCH_FILE -> stringResource(R.string.cmp_method_lkm, currentReport.imageToPatch)
+                            RecommendedMethod.ANYKERNEL3 -> stringResource(R.string.cmp_method_ak3, "boot.img")
+                        }
+                        Text(
+                            text = stringResource(R.string.cmp_recommended, methodLabel),
+                            color = glass.accentText,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
 
                         // Items sorted by severity descending
                         sortedItems.forEach { item ->

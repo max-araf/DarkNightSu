@@ -26,6 +26,7 @@ internal data class InstallUiState(
     val kpmBootUri: android.net.Uri?,
     val canPatchKpm: Boolean,
     val rootAvailable: Boolean,
+    val isGkiDevice: Boolean = false,
     val blockModulesEnabled: Boolean,
     val blockModules: String,
     val blockModulesValid: Boolean,

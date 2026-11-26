@@ -12,8 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.runtime.Composable
-import androidx.compose.material.icons.automirrored.filled.Send
-import com.kazesu.manager.ui.util.DarkNightContact
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +27,9 @@ import kotlinx.coroutines.withContext
 import com.kazesu.manager.BuildConfig
 import com.kazesu.manager.R
 import com.kazesu.manager.ui.component.dialog.LoadingDialogHandle
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import com.kazesu.manager.ui.util.DarkNightContact
 import com.kazesu.manager.ui.util.getBugreportFile
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
@@ -132,20 +133,31 @@ fun SendLogDialog(
                 insideMargin = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
             )
             ArrowPreference(
-                title = stringResource(id = R.string.contact_developer),
+                title = stringResource(id = R.string.send_logs_issues),
                 startAction = {
                     Icon(
-                        Icons.AutoMirrored.Filled.Send,
+                        painter = painterResource(R.drawable.ic_link_telegram),
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 16.dp),
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .size(22.dp),
                         tint = colorScheme.onSurface
                     )
                 },
                 onClick = {
                     onDismissRequest()
-                    DarkNightContact.openDeveloperChat(context)
+                    DarkNightContact.openIssuesTopic(context)
                 },
                 insideMargin = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            )
+            Text(
+                text = stringResource(id = R.string.send_logs_issues_hint),
+                style = MiuixTheme.textStyles.body2,
+                color = colorScheme.onSurfaceVariantSummary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
             )
             TextButton(
                 text = stringResource(id = android.R.string.cancel),

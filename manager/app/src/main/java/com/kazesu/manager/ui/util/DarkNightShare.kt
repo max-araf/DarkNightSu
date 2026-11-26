@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.kazesu.manager.ui.theme.DarkNightLinks
 
 /** Share helpers used by the compatibility checker and the boot image extractor. */
 object DarkNightShare {
@@ -27,7 +26,7 @@ object DarkNightShare {
     fun shareTextToDeveloper(context: Context, text: String, chooserTitle: String) {
         val base = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "${DarkNightLinks.DEVELOPER_HANDLE}\n\n$text")
+            putExtra(Intent.EXTRA_TEXT, "${DarkNightIssues.SHARE_NOTE}\n\n$text")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         for (pkg in telegramPackages) {

@@ -117,6 +117,7 @@ internal fun InstallScreenMaterial(
         ) {
             RootCompatCheckCard(
                 rootAvailable = uiState.rootAvailable,
+                isGkiDevice = uiState.isGkiDevice,
                 onShowMessage = actions.onShowMessage,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
@@ -431,10 +432,13 @@ private fun SelectInstallMethod(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             state.installMethodOptions.forEach { option ->
+                val isRecommended = (state.isGkiDevice && option is InstallMethod.SelectFile) ||
+                    (!state.isGkiDevice && option is InstallMethod.HorizonKernel)
                 InstallMethodCard(
                     title = stringResource(option.label),
                     summary = option.summary,
                     selected = state.installMethod?.let { option::class == it::class } ?: false,
+                    recommended = isRecommended,
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                         onClick(option)
@@ -450,6 +454,7 @@ private fun InstallMethodCard(
     title: String,
     summary: String?,
     selected: Boolean,
+    recommended: Boolean = false,
     onClick: () -> Unit,
 ) {
     val borderColor by animateColorAsState(
@@ -471,11 +476,29 @@ private fun InstallMethodCard(
         ) {
             RadioButton(selected = selected, onClick = null)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    if (recommended) {
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                        ) {
+                            Text(
+                                text = "★",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp),
+                            )
+                        }
+                    }
+                }
                 if (!summary.isNullOrBlank()) {
                     Text(
                         text = summary,

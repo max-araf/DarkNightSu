@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.automirrored.filled.Send
-import com.kazesu.manager.ui.util.DarkNightContact
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +44,8 @@ import kotlinx.coroutines.withContext
 import com.kazesu.manager.BuildConfig
 import com.kazesu.manager.R
 import com.kazesu.manager.ui.component.dialog.rememberLoadingDialog
+import androidx.compose.ui.res.painterResource
+import com.kazesu.manager.ui.util.DarkNightContact
 import com.kazesu.manager.ui.util.getBugreportFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -177,20 +177,30 @@ fun SendLogBottomSheet(
                         modifier = Modifier.size(64.dp),
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                            DarkNightContact.openDeveloperChat(context)
+                            dismiss()
+                            DarkNightContact.openIssuesTopic(context)
                         }) {
                         Icon(
-                            Icons.AutoMirrored.Filled.Send,
-                            contentDescription = stringResource(id = R.string.contact_developer),
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            painter = painterResource(R.drawable.ic_link_telegram),
+                            contentDescription = stringResource(id = R.string.send_logs_issues),
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.CenterHorizontally)
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(id = R.string.contact_developer),
+                        text = stringResource(id = R.string.send_logs_issues),
                         textAlign = TextAlign.Center,
                     )
                 }
             }
+            Text(
+                text = stringResource(id = R.string.send_logs_issues_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            )
         })
 }

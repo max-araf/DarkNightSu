@@ -45,6 +45,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalResources
 import com.kazesu.manager.ui.component.BrickGuardDialog
+import com.kazesu.manager.ui.component.readSavedCompatOverrides
 import com.kazesu.manager.ui.component.dialog.DownloadDialog
 import com.kazesu.manager.ui.util.*
 import top.yukonga.miuix.kmp.basic.SnackbarHostState as MiuixSnackbarHostState
@@ -284,7 +285,10 @@ fun InstallScreen(
             if (report == null) {
                 loadingDialog.showLoading()
                 report = try {
-                    RootCompatChecker.run(deep = false)
+                    RootCompatChecker.run(
+                        deep = false,
+                        overrides = readSavedCompatOverrides(context, isGki = isGkiDevice),
+                    )
                 } finally {
                     loadingDialog.hide()
                 }
@@ -423,6 +427,7 @@ fun InstallScreen(
         kpmBootUri = kpmBootUri,
         canPatchKpm = canPatchKpm,
         rootAvailable = rootAvailable,
+        isGkiDevice = isGkiDevice,
         blockModulesEnabled = blockModulesEnabled,
         blockModules = blockModules,
         blockModulesValid = isBlockModulesValid(effectiveBlockModules),

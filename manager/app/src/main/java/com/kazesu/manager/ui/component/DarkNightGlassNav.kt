@@ -400,6 +400,13 @@ fun DarkNightGlassSidebarOverlay(
                             onClick = { systemItems[0].onClick() },
                         )
                         RailIconButton(
+                            item = systemItems[1],
+                            selected = false,
+                            palette = palette,
+                            enabled = !expanded,
+                            onClick = { systemItems[1].onClick() },
+                        )
+                        RailIconButton(
                             item = systemItems[2],
                             selected = selectedId == "settings",
                             palette = palette,

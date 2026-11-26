@@ -49,7 +49,9 @@ import com.kazesu.manager.ui.util.CustomTextKey
 import com.kazesu.manager.ui.util.customText
 import com.kazesu.manager.ui.navigation3.Navigator
 import com.kazesu.manager.ui.navigation3.Route
+import com.kazesu.manager.getKernelVersion
 import com.kazesu.manager.ui.component.LockedFeatureDialog
+import com.kazesu.manager.ui.component.readSavedCompatOverrides
 import com.kazesu.manager.ui.util.RootCompatChecker
 import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import com.kazesu.manager.ui.util.rootAvailable
@@ -137,7 +139,7 @@ fun HomePager(
 
     LaunchedEffect(toolsUnlocked) {
         if (!toolsUnlocked && RootCompatChecker.latest.value == null) {
-            runCatching { RootCompatChecker.run(deep = false) }
+            runCatching { RootCompatChecker.run(deep = false, overrides = readSavedCompatOverrides(context, isGki = getKernelVersion().isGKI())) }
         }
     }
 

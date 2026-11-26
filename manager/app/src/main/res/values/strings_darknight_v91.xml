@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cmp_override_title">I know my device</string>
+    <string name="cmp_override_desc">Integrity / spoof modules and custom kernels can fake the bootloader state and kernel info. If the result is wrong for your phone, tell the checker and run it again.</string>
+    <string name="cmp_override_bootloader">My bootloader is unlocked (lock state is spoofed)</string>
+    <string name="cmp_override_vendor">RKP / Knox / vendor protections are already off on my phone</string>
+    <string name="cmp_recommended">Recommended for your device: %1$s</string>
+    <string name="cmp_method_lkm">Select a file and patch (%1$s)</string>
+    <string name="cmp_method_ak3">AnyKernel3 kernel zip (%1$s)</string>
+    <string name="cmp_already_rooted">DarkNightSu kernel is already active on this phone.</string>
+    <string name="send_logs_issues">Issues topic</string>
+    <string name="send_logs_issues_hint">Telegram opens. Choose the DarkNightSu group, then the Issues topic, and send the logs there.</string>
+</resources>

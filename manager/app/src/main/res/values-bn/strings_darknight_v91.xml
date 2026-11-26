@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cmp_override_title">আমি আমার ডিভাইস জানি</string>
+    <string name="cmp_override_desc">ইন্টেগ্রিটি / স্পুফ মডিউল ও কাস্টম কার্নেল বুটলোডার স্টেট আর কার্নেল তথ্য নকল করতে পারে। ফলাফল ভুল মনে হলে চেকারকে জানিয়ে আবার চালান।</string>
+    <string name="cmp_override_bootloader">আমার বুটলোডার আনলকড (লক স্টেট স্পুফ করা)</string>
+    <string name="cmp_override_vendor">আমার ফোনে RKP / Knox / ভেন্ডর প্রটেকশন আগেই বন্ধ করা</string>
+    <string name="cmp_recommended">আপনার ডিভাইসের জন্য সুপারিশ: %1$s</string>
+    <string name="cmp_method_lkm">ফাইল সিলেক্ট করে প্যাচ (%1$s)</string>
+    <string name="cmp_method_ak3">AnyKernel3 কার্নেল জিপ (%1$s)</string>
+    <string name="cmp_already_rooted">এই ফোনে DarkNightSu কার্নেল আগে থেকেই সক্রিয়।</string>
+    <string name="send_logs_issues">Issues টপিক</string>
+    <string name="send_logs_issues_hint">টেলিগ্রাম খুলবে। DarkNightSu গ্রুপ, তারপর Issues টপিক বেছে নিয়ে লগ পাঠান।</string>
+</resources>

@@ -156,6 +156,7 @@ internal fun InstallScreenMiuix(
                 item {
                     RootCompatCheckCard(
                         rootAvailable = uiState.rootAvailable,
+                        isGkiDevice = uiState.isGkiDevice,
                         onShowMessage = actions.onShowMessage,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -541,6 +542,8 @@ private fun SelectInstallMethod(
     ) {
         state.installMethodOptions.forEach { option ->
             val selected = state.installMethod?.let { option::class == it::class } ?: false
+            val isRecommended = (state.isGkiDevice && option is InstallMethod.SelectFile) ||
+                (!state.isGkiDevice && option is InstallMethod.HorizonKernel)
             AppCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -565,12 +568,25 @@ private fun SelectInstallMethod(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = stringResource(id = option.label),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = stringResource(id = option.label),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.onSurface,
+                            )
+                            if (isRecommended) {
+                                Text(
+                                    text = "★",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary,
+                                )
+                            }
+                        }
                         if (!option.summary.isNullOrBlank()) {
                             Text(
                                 text = option.summary.orEmpty(),
