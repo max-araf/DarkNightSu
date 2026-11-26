@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.KernelSU" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
+        <item name="android:windowBackground">@color/ic_launcher_darknight_splash_bg</item>
+    </style>
+
+    <style name="Theme.KernelSU.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_darknight_splash_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_empty</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.KernelSU</item>
+    </style>
+
+    <style name="Theme.KernelSU.WebUI" parent="Theme.KernelSU">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+    </style>
+
+</resources>

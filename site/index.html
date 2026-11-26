@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DarkNightSu — Root, dressed in glass</title>
+<meta name="description" content="DarkNightSu: a kernel-based root manager for Android with a frosted-glass UI, 10 live palettes and a kernel toolbox.">
+<meta name="theme-color" content="#06080E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%232563FF'/%3E%3Crect x='20' y='20' width='28' height='28' rx='6' fill='white'/%3E%3Crect x='52' y='52' width='28' height='28' rx='6' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{--a:#2563FF;--bg:#06080E;--ink:#EEF2FF;--mut:#8D98B5;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.1);--r:24px;--mx:50%;--my:30%}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Inter,system-ui,sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.glow{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(520px circle at var(--mx) var(--my),color-mix(in srgb,var(--a) 28%,transparent),transparent 70%);transition:background .5s}
+.aur{position:fixed;inset:0;z-index:-3;overflow:hidden;pointer-events:none}
+.aur i{position:absolute;border-radius:50%;filter:blur(100px);background:var(--a);transition:background .8s}
+.aur i:nth-child(1){width:560px;height:560px;left:-160px;top:-140px;opacity:.3;animation:d1 20s ease-in-out infinite alternate}
+.aur i:nth-child(2){width:460px;height:460px;right:-140px;top:30%;opacity:.2;animation:d2 24s ease-in-out infinite alternate}
+.aur i:nth-child(3){width:520px;height:520px;left:20%;bottom:-240px;opacity:.18;animation:d1 28s ease-in-out infinite alternate-reverse}
+@keyframes d1{to{transform:translate(80px,60px) scale(1.1)}}@keyframes d2{to{transform:translate(-70px,80px)}}
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+/* nav */
+nav{position:fixed;top:12px;left:0;right:0;z-index:20;padding:0 16px}
+nav .bar{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:9px 12px 9px 16px;border-radius:999px;background:rgba(8,11,20,.6);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.brand svg{width:28px;height:28px}
+nav ul{display:flex;gap:2px;list-style:none;padding:0;align-items:center}
+nav ul a{padding:7px 12px;border-radius:999px;font-size:14px;color:var(--mut);transition:.2s}
+nav ul a:hover{color:var(--ink);background:var(--card)}
+@media(max-width:720px){nav ul li:not(:last-child){display:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid var(--line);background:var(--card);transition:.25s;color:var(--ink);cursor:pointer;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-3px);border-color:var(--a)}
+.btn.p{background:linear-gradient(135deg,var(--a),color-mix(in srgb,var(--a) 50%,#000));border-color:transparent;box-shadow:0 12px 34px -10px var(--a);color:#fff}
+.btn.p::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);animation:shine 3.5s infinite}
+@keyframes shine{40%,100%{transform:translateX(120%)}}
+.btn.sm{padding:8px 16px;font-size:14px}
+/* hero */
+.hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:110px 0 50px}
+.logo{width:150px;height:150px;position:relative;margin-bottom:26px;filter:drop-shadow(0 22px 50px var(--a));animation:fl 6s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-10px)}}
+.logo svg{width:100%;height:100%;overflow:visible}
+.sq{transform-box:fill-box;transform-origin:center;opacity:0}
+.s1{animation:in1 1.5s .15s cubic-bezier(.2,.9,.25,1) forwards}
+.s2{animation:in2 1.5s .15s cubic-bezier(.2,.9,.25,1) forwards}
+.s3,.s4{animation:inb 1.2s 1.3s ease forwards}
+@keyframes in1{0%{opacity:0;transform:translate(-120px,-90px) rotate(-120deg) scale(.4)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes in2{0%{opacity:0;transform:translate(120px,90px) rotate(120deg) scale(.4)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes inb{to{opacity:1}}
+.ring{position:absolute;inset:-26px;border-radius:50%;border:1px solid var(--line);animation:pulse 3.4s 1.5s ease-out infinite;opacity:0}
+@keyframes pulse{0%{transform:scale(.8);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+h1{font-size:clamp(44px,9vw,88px);line-height:1.03;letter-spacing:-2px;font-weight:800}
+h1 .w{display:inline-block;opacity:0;transform:translateY(30px);animation:up .8s forwards}
+h1 .w:nth-child(1){animation-delay:.9s}h1 .w:nth-child(2){animation-delay:1.05s}h1 .w:nth-child(3){animation-delay:1.2s}
+@keyframes up{to{opacity:1;transform:none}}
+h1 b{background:linear-gradient(90deg,var(--a),color-mix(in srgb,var(--a) 35%,#fff),var(--a));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 5s linear infinite}
+@keyframes sh{to{background-position:200%}}
+.tag{margin:18px auto 30px;max-width:580px;color:var(--mut);font-size:18px;min-height:56px}
+.tag span{color:var(--ink)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pal{margin-top:38px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.pal small{color:var(--mut);font-size:13px}
+.dots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.dots button{width:32px;height:32px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--line);transition:.25s}
+.dots button:hover{transform:scale(1.18)}
+.dots button.on{border-color:#fff;box-shadow:0 0 20px var(--c)}
+.pname{font-weight:600;font-size:14px}
+/* sections */
+section{padding:84px 0 4px}
+.eye{font-size:12px;letter-spacing:2.2px;text-transform:uppercase;color:var(--a);font-weight:700}
+h2{font-size:clamp(30px,5.4vw,46px);letter-spacing:-1px;line-height:1.1;margin:8px 0 10px}
+.sub{color:var(--mut);max-width:560px;margin-bottom:32px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.card{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:transform .3s,border-color .3s}
+.card:hover{border-color:color-mix(in srgb,var(--a) 60%,transparent)}
+.card::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;left:var(--cx,50%);top:var(--cy,0);transform:translate(-50%,-50%);background:radial-gradient(circle,color-mix(in srgb,var(--a) 30%,transparent),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card:hover::after{opacity:1}
+.ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;margin-bottom:14px;background:color-mix(in srgb,var(--a) 22%,transparent);color:var(--a);font-size:21px}
+.card h3{font-size:18px;margin-bottom:6px}.card p{color:var(--mut);font-size:15px}
+/* phones */
+.phones{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;perspective:1200px}
+.phone{width:250px;border-radius:34px;padding:8px;background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.04));border:1px solid var(--line);box-shadow:0 40px 80px -30px var(--a);transition:transform .2s ease-out;transform-style:preserve-3d}
+.phone img{display:block;width:100%;border-radius:27px}
+.phone:nth-child(2){margin-top:46px}
+.cap{text-align:center;color:var(--mut);font-size:14px;margin-top:14px}
+/* tables */
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-size:12.5px;text-transform:uppercase;letter-spacing:1px}tr:last-child td{border:0}
+code{font:13px ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px}
+.warn{margin-top:18px;padding:20px 22px;border-radius:var(--r);border:1px solid rgba(255,90,90,.4);background:rgba(255,70,70,.07)}
+.warn b{color:#ff8a8a}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;counter-reset:s}
+.step{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--a);color:#fff;font-weight:800;margin-bottom:12px}
+.step p{color:var(--mut);font-size:15px}
+.cta2{margin-top:30px;padding:44px 24px;border-radius:32px;text-align:center;background:linear-gradient(160deg,color-mix(in srgb,var(--a) 24%,transparent),var(--card));border:1px solid color-mix(in srgb,var(--a) 40%,transparent)}
+.cta2 h2{margin-top:0}
+footer{margin-top:80px;padding:34px 0 50px;border-top:1px solid var(--line);text-align:center;color:var(--mut);font-size:14px}
+footer a{color:var(--ink);border-bottom:1px solid var(--line)}
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.sq,h1 .w{opacity:1;transform:none}.ring{display:none}}
+</style>
+</head>
+<body>
+<div class="aur"><i></i><i></i><i></i></div><div class="glow"></div><canvas class="stars" id="st"></canvas>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="color-mix(in srgb,var(--a) 50%,#fff)"/><stop offset=".5" stop-color="var(--a)"/><stop offset="1" stop-color="color-mix(in srgb,var(--a) 42%,#000)"/></linearGradient>
+<symbol id="mini" viewBox="0 0 100 100"><rect x="4" y="4" width="92" height="92" rx="26" fill="url(#lg)"/><rect x="20" y="20" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect x="51" y="51" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect x="51" y="20" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/><rect x="20" y="51" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/></symbol></defs></svg>
+
+<nav><div class="bar"><a class="brand" href="#top"><svg><use href="#mini"/></svg>DarkNightSu</a>
+<ul><li><a href="#features">Features</a></li><li><a href="#screens">Screens</a></li><li><a href="#compat">Compatibility</a></li><li><a href="#install">Install</a></li><li><a class="btn p sm" data-link="releases" href="#">Download</a></li></ul></div></nav>
+
+<header class="hero wrap" id="top">
+  <div class="logo"><div class="ring"></div>
+    <svg viewBox="0 0 100 100"><rect x="4" y="4" width="92" height="92" rx="26" fill="url(#lg)"/><rect x="5" y="5" width="90" height="90" rx="25" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.4"/>
+    <rect class="sq s3" x="51" y="20" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/><rect class="sq s4" x="20" y="51" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/>
+    <rect class="sq s1" x="20" y="20" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect class="sq s2" x="51" y="51" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/></svg></div>
+  <h1><span class="w">Root,</span> <span class="w">dressed</span> <span class="w">in <b>glass.</b></span></h1>
+  <p class="tag" id="tag"></p>
+  <div class="cta"><a class="btn p" data-link="releases" href="#">⬇ Download</a><a class="btn" data-link="group" href="#">💬 Join Telegram</a><a class="btn" data-link="github" href="#">GitHub</a></div>
+  <div class="pal"><small>Tap a colour: this page changes, just like the app</small><div class="dots" id="dots"></div><div class="pname" id="pname"></div></div>
+</header>
+
+<main class="wrap">
+<section id="features"><span class="eye rv">Features</span><h2 class="rv">Powerful inside. Personal outside.</h2><p class="sub rv">Kernel-based root with a design you can actually make your own.</p>
+<div class="cards">
+<div class="card rv"><div class="ic">🎨</div><h3>10 live palettes</h3><p>Logo, splash, toggles and icons all follow the colour you pick.</p></div>
+<div class="card rv"><div class="ic">🧊</div><h3>Frosted-glass UI</h3><p>Glass cards, a floating pill dock or sidebar, Material 3 and Miuix styles.</p></div>
+<div class="card rv"><div class="ic">🛠️</div><h3>Kernel toolbox</h3><p>Game profiles, bypass charge, integrity hub, live logs, rescue, plus DarkTune.</p></div>
+<div class="card rv"><div class="ic">🛡️</div><h3>Per-app root</h3><p>Kernel-based su with App Profile and temporary grants. SUSFS hiding built in.</p></div>
+<div class="card rv"><div class="ic">📦</div><h3>Flash &amp; patch</h3><p>LKM, boot image patching, AnyKernel3 zips and KPM, all from one Install screen.</p></div>
+<div class="card rv"><div class="ic">🚀</div><h3>Made to feel good</h3><p>Aurora startup, first-run onboarding and a live info bar for CPU, battery and temperature.</p></div>
+</div></section>
+
+<section id="screens"><span class="eye rv">Screens</span><h2 class="rv">See it for yourself.</h2>
+<div class="phones rv"><div class="phone" data-tilt><img src="img/home.jpg" alt="DarkNightSu home screen" loading="lazy"></div><div class="phone" data-tilt><img src="img/install.jpg" alt="DarkNightSu install screen" loading="lazy"></div></div>
+<p class="cap rv">Home and Install on a real device, Aura palette.</p></section>
+
+<section id="compat"><span class="eye rv">Compatibility</span><h2 class="rv">Will it run on my phone?</h2><p class="sub rv">It depends on your <b>kernel</b>, not the app.</p>
+<div class="tw rv"><table><tr><th>Device</th><th>Method</th><th>Notes</th></tr>
+<tr><td>GKI (kernel 5.10+)</td><td>LKM / boot patch</td><td>Recommended. Use the <code>.ko</code> that matches your KMI.</td></tr>
+<tr><td>Non-GKI (4.14+)</td><td>Custom kernel</td><td>Integrate DarkNightSu into your kernel source and build it.</td></tr>
+<tr><td>KPM</td><td><code>CONFIG_KPM=y</code></td><td>64-bit kernels. Non-GKI also needs <code>CONFIG_KALLSYMS_ALL=y</code>.</td></tr></table></div>
+<div class="warn rv"><b>⚠ Read this.</b> If your phone's kernel does not support kernel root, stay away. DarkNightSu can't force root onto an unsupported kernel, and a wrong flash can brick your device. Always back up your original boot image.</div></section>
+
+<section id="install"><span class="eye rv">Install</span><h2 class="rv">Three steps.</h2>
+<div class="steps"><div class="step rv"><b>Get a compatible kernel</b><p>Flash a supported kernel, or load the LKM or patch your <code>boot.img</code> from the manager.</p></div>
+<div class="step rv"><b>Install the APK</b><p>Only the official <code>-release.apk</code> from Releases. Debug and CI builds are rejected by the kernel.</p></div>
+<div class="step rv"><b>Open and personalise</b><p>Pick your palette, UI style and dock. Done.</p></div></div>
+<div class="cta2 rv"><h2>Get DarkNightSu</h2><p class="sub" style="margin:0 auto 22px">Questions, bugs or ideas? The community and the developer are on Telegram.</p>
+<div class="cta"><a class="btn p" data-link="releases" href="#">⬇ Download</a><a class="btn" data-link="group" href="#">💬 Telegram group</a><a class="btn" data-link="dev" href="#">👤 Contact developer</a><a class="btn" data-link="drive" href="#" id="drv">☁ Drive mirror</a></div></div></section>
+</main>
+
+<footer><div class="wrap">Made with ❤ by <a data-link="dev" href="#">max-araf</a> · <a data-link="github" href="#">GitHub</a> · <a data-link="group" href="#">Telegram</a><br><span style="font-size:13px">Built on open-source KazeSU (SukiSU Nova, SukiSU-Ultra, KernelSU, KernelPatch, susfs). GPL-3.0.</span></div></footer>
+
+<script>
+/* ===== EDIT YOUR LINKS HERE ===== */
+const LINKS={
+  github:"https://github.com/max-araf/DarkNightSu",
+  releases:"https://github.com/max-araf/DarkNightSu/releases/latest",
+  group:"https://t.me/darknightsu",
+  dev:"https://t.me/Max_araf_2010",
+  drive:""   // paste your Drive link here; the button hides itself while it is empty
+};
+document.querySelectorAll("[data-link]").forEach(a=>{const u=LINKS[a.dataset.link];if(u)a.href=u;else a.style.display="none"});
+
+const PALS=[["DarkNight Aura","#2563FF"],["Royal Violet","#9303C5"],["Crimson Noir","#E0194D"],["Forest Noir","#12A62A"],["Golden Bronze","#FFD84D"],["Cyber Ocean","#00BBFF"],["Amber Glow","#FEB42F"],["Royal Ember","#07A57C"],["Mint Aurora","#07D0A4"],["Royal Charcoal","#7D8088"]];
+const dots=document.getElementById("dots"),pn=document.getElementById("pname");
+function setPal(i,save){document.documentElement.style.setProperty("--a",PALS[i][1]);pn.textContent=PALS[i][0];[...dots.children].forEach((b,j)=>b.classList.toggle("on",i===j));if(save)try{localStorage.setItem("dn_pal",i)}catch(e){}}
+PALS.forEach((p,i)=>{const b=document.createElement("button");b.style.setProperty("--c",p[1]);b.title=p[0];b.setAttribute("aria-label",p[0]);b.onclick=()=>setPal(i,1);dots.appendChild(b)});
+let s=0;try{s=+localStorage.getItem("dn_pal")||0}catch(e){}setPal(s);
+
+/* typing tagline */
+const T=["A kernel-based root manager for Android.","10 palettes. Frosted glass. Your kernel, your rules.","GKI, non-GKI, LKM, boot patch, KPM, SUSFS."];
+const tg=document.getElementById("tag");let ti=0,ci=0,del=false;
+(function type(){const t=T[ti];tg.innerHTML="<span>"+t.slice(0,ci)+"</span>"+'<span style="opacity:.6">|</span>';
+if(!del&&ci<t.length){ci++;setTimeout(type,38)}else if(!del){del=true;setTimeout(type,1700)}else if(ci>0){ci--;setTimeout(type,16)}else{del=false;ti=(ti+1)%T.length;setTimeout(type,300)}})();
+
+/* cursor glow + card spotlight */
+addEventListener("pointermove",e=>{const r=document.documentElement.style;r.setProperty("--mx",e.clientX+"px");r.setProperty("--my",e.clientY+"px")});
+document.querySelectorAll(".card").forEach(c=>c.addEventListener("pointermove",e=>{const b=c.getBoundingClientRect();c.style.setProperty("--cx",(e.clientX-b.left)+"px");c.style.setProperty("--cy",(e.clientY-b.top)+"px")}));
+/* phone tilt */
+document.querySelectorAll("[data-tilt]").forEach(p=>{p.addEventListener("pointermove",e=>{const b=p.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;p.style.transform=`rotateY(${x*14}deg) rotateX(${-y*14}deg)`});p.addEventListener("pointerleave",()=>p.style.transform="")});
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll(".rv").forEach((el,i)=>{el.style.transitionDelay=(i%3)*90+"ms";io.observe(el)});
+/* stars */
+(function(){const c=document.getElementById("st"),x=c.getContext("2d");let w,h,P=[];function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=Array.from({length:Math.min(70,w/14|0)},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.4+.3,v:Math.random()*.15+.03,a:Math.random()*.5+.2}))}
+rs();addEventListener("resize",rs);if(matchMedia("(prefers-reduced-motion:reduce)").matches){P.forEach(p=>{x.globalAlpha=p.a;x.fillStyle="#fff";x.fillRect(p.x,p.y,p.r,p.r)});return}
+(function f(){x.clearRect(0,0,w,h);for(const p of P){p.y-=p.v;if(p.y<0){p.y=h;p.x=Math.random()*w}x.globalAlpha=p.a;x.fillStyle="#fff";x.beginPath();x.arc(p.x,p.y,p.r,0,6.3);x.fill()}requestAnimationFrame(f)})()})();
+</script>
+</body></html>

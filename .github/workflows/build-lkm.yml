@@ -1,0 +1,65 @@
+name: Build LKM for KernelSU
+on:
+  workflow_call:
+    inputs:
+      expected_size:
+        description: 'Primary expected signature size'
+        required: false
+        default: ''
+        type: string
+      expected_hash:
+        description: 'Primary expected signature hash'
+        required: false
+        default: ''
+        type: string
+      expected_pr_build_size:
+        description: 'Second expected signature size (for PR builds)'
+        required: false
+        default: ''
+        type: string
+      expected_pr_build_hash:
+        description: 'Second expected signature hash (for PR builds)'
+        required: false
+        default: ''
+        type: string
+      hook:
+        description: 'Kconfig hook flavor suffix (TRACEPOINT_HOOK or TAMPER_SYSCALL_TABLE)'
+        required: false
+        default: 'TRACEPOINT_HOOK'
+        type: string
+  workflow_dispatch:
+    inputs:
+      hook:
+        description: 'Kconfig hook flavor suffix'
+        required: false
+        default: 'TRACEPOINT_HOOK'
+        type: choice
+        options:
+          - TRACEPOINT_HOOK
+          - TAMPER_SYSCALL_TABLE
+jobs:
+  build-lkm:
+    strategy:
+      fail-fast: false
+      matrix:
+        kmi:
+          - android12-5.10
+          - android13-5.10
+          - android13-5.15
+          - android14-5.15
+          - android14-6.1
+          - android15-6.6
+          - android16-6.12
+          - android17-6.18
+        arch:
+          - arm64
+          - x86_64
+    uses: ./.github/workflows/ddk-lkm.yml
+    with:
+      kmi: ${{ matrix.kmi }}
+      arch: ${{ matrix.arch }}
+      expected_size: ${{ inputs.expected_size || '' }}
+      expected_hash: ${{ inputs.expected_hash || '' }}
+      expected_pr_build_size: ${{ inputs.expected_pr_build_size || '' }}
+      expected_pr_build_hash: ${{ inputs.expected_pr_build_hash || '' }}
+      hook: ${{ inputs.hook || 'TRACEPOINT_HOOK' }}

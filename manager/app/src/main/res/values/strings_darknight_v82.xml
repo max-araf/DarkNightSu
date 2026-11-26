@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_link_source">View source code on GitHub</string>
+    <string name="about_link_group">Join the DarkNightSu Telegram group</string>
+    <string name="about_link_developer">Contact the developer on Telegram</string>
+    <string name="contact_developer">Developer</string>
+</resources>

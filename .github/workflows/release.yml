@@ -1,0 +1,90 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build-manager:
+    uses: ./.github/workflows/build-manager.yml
+    secrets: inherit
+  release:
+    needs:
+      - build-manager
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          CUR_TAG="${{ github.ref_name }}"
+          # Previous reachable tag; fall back to second-newest v* tag.
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag --list 'v*' --sort=-v:refname | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="HEAD"
+          else
+            RANGE="$PREV_TAG..HEAD"
+          fi
+          {
+            echo "## What's changed in $CUR_TAG ($RANGE)"
+            echo ""
+            git log "$RANGE" --no-merges --pretty=format:'- %s (%h)' --reverse
+            echo ""
+          } > CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Download Manager artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: manager
+          name: "Manager-release"
+          merge-multiple: true
+
+      - name: Download LKM artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: lkm
+          pattern: "*-lkm"
+
+      - name: Prepare LKM release assets
+        run: |
+          mkdir -p release-lkm
+          for d in lkm/*/; do
+            [ -d "$d" ] || continue
+            artifact=$(basename "$d")
+            for f in $(find "$d" -type f -name "*.ko"); do
+              base=$(basename "$f")
+              cp "$f" "release-lkm/${artifact}-${base}"
+            done
+          done
+          echo "LKM release assets:"
+          ls -l release-lkm
+          # Fail early on duplicate basenames instead of hitting
+          # softprops "already exists (race condition)" errors.
+          test -n "$(ls release-lkm/*.ko 2>/dev/null)"
+
+      - name: Check pre-release tag
+        id: is_rc_tag
+        run: |
+          case "${GITHUB_REF_NAME:-}" in
+            *-alpha* | *-beta* | *-rc*) echo "IS_RC_TAG=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "IS_RC_TAG=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: release
+        uses: softprops/action-gh-release@v3
+        with:
+          prerelease: ${{ steps.is_rc_tag.outputs.IS_RC_TAG == 'true' }}
+          generate_release_notes: true
+          body_path: CHANGELOG.md
+          files: |
+            manager/*.apk
+            release-lkm/*.ko
