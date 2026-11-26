@@ -1320,7 +1320,9 @@ fun getKpmVersion(): String {
 }
 
 private fun findSusfsCli(shell: Shell): String? {
-    val cmd = "for p in /data/adb/ksu/bin/ksu_susfs /data/adb/modules/susfs4ksu/ksu_susfs /data/adb/modules/.brene_susfs/ksu_susfs /system/bin/ksu_susfs; do [ -x "\$p" ] && echo "\$p" && break; done; command -v ksu_susfs 2>/dev/null | head -n 1"
+    val paths = listOf("/data/adb/ksu/bin/ksu_susfs", "/data/adb/modules/susfs4ksu/ksu_susfs", "/data/adb/modules/.brene_susfs/ksu_susfs", "/system/bin/ksu_susfs")
+    for (path in paths) { if (ShellUtils.fastCmdResult(shell, "[ -x '$path' ]")) return path }
+    val cmd = "command -v ksu_susfs 2>/dev/null | head -n 1"
     return ShellUtils.fastCmd(shell, cmd).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
 }
 
