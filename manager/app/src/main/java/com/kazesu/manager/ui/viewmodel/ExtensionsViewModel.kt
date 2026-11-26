@@ -99,8 +99,16 @@ class ExtensionsViewModel(
     }
 }
 
-private fun toItem(state: ExtensionState): ExtensionItem =
-    ExtensionItem(
-        state = state,
-        descriptor = ExtensionCatalog.descriptorFor(state.wireName, state.id),
+private fun toItem(state: ExtensionState): ExtensionItem {
+    val resolved = if (state.wireName == "susfs" && !state.supported &&
+        com.kazesu.manager.ui.util.getSuSFSStatus().equals("true", ignoreCase = true)
+    ) {
+        state.copy(supported = true, value = if (state.value == 0L) 1L else state.value)
+    } else {
+        state
+    }
+    return ExtensionItem(
+        state = resolved,
+        descriptor = ExtensionCatalog.descriptorFor(resolved.wireName, resolved.id),
     )
+}

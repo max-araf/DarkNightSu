@@ -552,7 +552,26 @@ fun installBoot(
         cmd += " --partition $part"
     }
 
-    val result = flashWithIO("${getKsuDaemonPath()} $cmd", onStdout, onStderr)
+    var sawUnsupportedBootHeader = false
+    val wrappedOut: (String) -> Unit = { line ->
+        if (line.contains("bootimage version", ignoreCase = true) && line.contains("not supported", ignoreCase = true)) {
+            sawUnsupportedBootHeader = true
+        }
+        onStdout(line)
+    }
+    val wrappedErr: (String) -> Unit = { line ->
+        if (line.contains("bootimage version", ignoreCase = true) && line.contains("not supported", ignoreCase = true)) {
+            sawUnsupportedBootHeader = true
+        }
+        onStderr(line)
+    }
+    val result = flashWithIO("${getKsuDaemonPath()} $cmd", wrappedOut, wrappedErr)
+    if (!result.isSuccess && sawUnsupportedBootHeader) {
+        onStderr("")
+        onStderr("[!] Non-GKI boot.img detected (boot header v0/v1/v2).")
+        onStderr("[!] LKM boot-image patching only supports GKI 2.0 (boot header v3/v4, usually init_boot.img or GKI boot.img).")
+        onStderr("[!] For Non-GKI devices, flash a DarkNightSu AnyKernel3 kernel zip instead.")
+    }
     Log.i("KernelSU", "install boot result: ${result.isSuccess}")
 
     bootFile?.delete()
@@ -1300,20 +1319,41 @@ fun getKpmVersion(): String {
     return result.trim()
 }
 
+private fun findSusfsCli(shell: Shell): String? {
+    val cmd = "for p in /data/adb/ksu/bin/ksu_susfs /data/adb/modules/susfs4ksu/ksu_susfs /data/adb/modules/.brene_susfs/ksu_susfs /system/bin/ksu_susfs; do [ -x "\$p" ] && echo "\$p" && break; done; command -v ksu_susfs 2>/dev/null | head -n 1"
+    return ShellUtils.fastCmd(shell, cmd).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
+}
+
 fun getSuSFSStatus(): String {
     val shell = getRootShell()
-    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs status").trim()
+    val native = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs status").trim()
+    if (native.equals("true", ignoreCase = true)) return "true"
+    val cli = findSusfsCli(shell) ?: return native
+    val ver = ShellUtils.fastCmd(shell, "'$cli' show version 2>/dev/null").trim()
+    return if (ver.isNotEmpty() && !ver.contains("Invalid", ignoreCase = true) && !ver.contains("Error", ignoreCase = true) && !ver.contains("not", ignoreCase = true)) {
+        "true"
+    } else {
+        native
+    }
 }
 
 fun getSuSFSVersion(): String {
     val shell = getRootShell()
-    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs version")
-    return result
+    val native = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs version").trim()
+    if (native.isNotEmpty() && !native.contains("Invalid", ignoreCase = true) && !native.contains("Error", ignoreCase = true) && !native.equals("null", ignoreCase = true)) {
+        return native
+    }
+    val cli = findSusfsCli(shell) ?: return native
+    val ver = ShellUtils.fastCmd(shell, "'$cli' show version 2>/dev/null").trim()
+    return if (ver.isNotEmpty() && !ver.contains("Invalid", ignoreCase = true) && !ver.contains("Error", ignoreCase = true)) ver else native
 }
 
 fun getSuSFSVariant(): String {
     val shell = getRootShell()
-    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs variant").trim()
+    val native = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs variant").trim()
+    if (native.isNotEmpty() && !native.contains("Invalid", ignoreCase = true)) return native
+    val cli = findSusfsCli(shell) ?: return native
+    return ShellUtils.fastCmd(shell, "'$cli' show variant 2>/dev/null").trim().ifEmpty { native }
 }
 
 fun getSuSFSImplementation(): String {

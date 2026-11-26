@@ -442,11 +442,14 @@ class ThemeStoreRepository(
         onTransferred: (Long, Long) -> Unit,
         allowRestart: Boolean,
     ): File {
-        val probe = probePackageRange(entry, url, token)
-        if (probe.totalSize > 0L && probe.totalSize != entry.size) {
+        val probe = runCatching { probePackageRange(entry, url, token) }.getOrNull()
+        if (probe == null || (probe.totalSize > 0L && entry.size > 0L && probe.totalSize != entry.size)) {
             tempFile.delete()
             metaFile.delete()
-            throw IOException("Theme package size mismatch")
+            return downloadThemePackageSequential(
+                entry, url, token, tempFile, 0L, expectedSha,
+                onProgress, onTransferred, false,
+            )
         }
         if (probe.rangesSupported &&
             entry.size >= MIN_PARALLEL_DOWNLOAD_BYTES &&

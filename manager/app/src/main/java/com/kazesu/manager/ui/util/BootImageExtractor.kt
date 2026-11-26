@@ -36,7 +36,8 @@ object BootImageExtractor {
         val error: String?,
     )
 
-    private fun sh(cmd: String): Shell.Result = Shell.cmd(cmd).exec()
+    private fun sh(cmd: String): Shell.Result =
+        getRootShell().newJob().add(cmd).to(ArrayList(), ArrayList()).exec()
 
     private fun byNameDir(): String? {
         listOf("/dev/block/by-name", "/dev/block/bootdevice/by-name").forEach {

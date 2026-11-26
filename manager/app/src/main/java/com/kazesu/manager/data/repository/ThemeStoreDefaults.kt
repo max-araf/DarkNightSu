@@ -87,7 +87,11 @@ object ThemeStoreDefaults {
         if (isMainlandChina() && !isVpnActive()) {
             MAINLAND_BASE_URLS
         } else {
-            listOf(INTERNATIONAL_BASE_URL)
+            listOf(
+                INTERNATIONAL_BASE_URL,
+                MAINLAND_PRIMARY_BASE_URL,
+                MAINLAND_SECONDARY_BASE_URL,
+            )
         }
 
     /**
