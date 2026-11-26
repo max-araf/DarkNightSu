@@ -484,8 +484,8 @@ class MainActivity : ComponentActivity() {
                                         DarkNightScreenBackground { TuneScreen() }
                                     } else {
                                         LockedFeatureScreen(
-                                            onCheckDevice = { navController.push(Route.Install()) },
-                                            onBack = { navController.pop() },
+                                            onCheckDevice = { navigator.push(Route.Install()) },
+                                            onBack = { navigator.pop() },
                                         )
                                     }
                                 }
@@ -494,8 +494,8 @@ class MainActivity : ComponentActivity() {
                                         DarkNightToolboxScreen()
                                     } else {
                                         LockedFeatureScreen(
-                                            onCheckDevice = { navController.push(Route.Install()) },
-                                            onBack = { navController.pop() },
+                                            onCheckDevice = { navigator.push(Route.Install()) },
+                                            onBack = { navigator.pop() },
                                         )
                                     }
                                 }
