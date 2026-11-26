@@ -3,12 +3,16 @@ package com.kazesu.manager.ui.screen.about
 import android.text.Html
 import android.text.Spanned
 import android.text.style.URLSpan
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 
 @Immutable
 data class LinkInfo(
     val fullText: String,
-    val url: String
+    val url: String,
+    @DrawableRes val iconRes: Int = 0,
+    @StringRes val contentDescRes: Int = 0,
 )
 
 fun extractLinks(html: String): List<LinkInfo> {
@@ -27,4 +31,3 @@ fun extractLinks(html: String): List<LinkInfo> {
     }
     return result
 }
-

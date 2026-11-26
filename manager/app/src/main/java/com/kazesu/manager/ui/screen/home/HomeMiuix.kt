@@ -74,7 +74,11 @@ import com.kazesu.manager.ui.component.rebootlistpopup.RebootListPopupMiuix
 import com.kazesu.manager.ui.component.statustag.StatusTag
 import com.kazesu.manager.ui.component.DarkNightStatusCardMiuix
 import com.kazesu.manager.ui.component.DarkNightStatusKind
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.ui.draw.alpha
+import com.kazesu.manager.ui.component.HomeCompatChip
 import com.kazesu.manager.ui.component.TuneHeroCard
+import com.kazesu.manager.ui.util.CompatReport
 import com.kazesu.manager.ai.api.AiFeatureBridge
 import com.kazesu.manager.ui.theme.AiAssistantMaterialTheme
 import com.kazesu.manager.ui.theme.LocalBackgroundImagePath
@@ -115,6 +119,9 @@ fun HomePagerMiuix(
     state: HomeUiState,
     actions: HomeActions,
     bottomInnerPadding: Dp,
+    toolsUnlocked: Boolean = state.ksuVersion != null,
+    compatReport: CompatReport? = null,
+    onLockedFeatureClick: () -> Unit = actions.onInstallClick,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     val enableBlur = LocalEnableBlur.current
@@ -153,15 +160,22 @@ fun HomePagerMiuix(
                             state = state,
                             actions = actions,
                         )
+                        if (!toolsUnlocked && compatReport != null) {
+                            HomeCompatChip(
+                                report = compatReport,
+                                onClick = actions.onInstallClick,
+                            )
+                        }
                         TuneHeroCard(
                             modifier = Modifier.fillMaxWidth(),
-                            onClick = if (state.isRootAvailable) actions.onOpenTune else actions.onInstallClick,
-                            locked = !state.isRootAvailable,
+                            onClick = if (toolsUnlocked) actions.onOpenTune else onLockedFeatureClick,
+                            locked = !toolsUnlocked,
                         )
                         AppCard(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable(onClick = actions.onOpenDarkNightToolbox),
+                                .then(if (!toolsUnlocked) Modifier.alpha(0.55f) else Modifier)
+                                .clickable(onClick = if (toolsUnlocked) actions.onOpenDarkNightToolbox else onLockedFeatureClick),
                         ) {
                             Row(
                                 modifier = Modifier
@@ -172,13 +186,22 @@ fun HomePagerMiuix(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     top.yukonga.miuix.kmp.basic.Text(
-                                        text = "DarkNight Toolbox",
+                                        text = stringResource(R.string.darknight_toolbox_title),
                                         style = top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.title4,
                                     )
                                     top.yukonga.miuix.kmp.basic.Text(
-                                        text = "Game Profiles • Bypass Charge • Integrity Hub • Live Logs • Rescue",
+                                        text = if (!toolsUnlocked) stringResource(R.string.locked_sub)
+                                        else "Game Profiles • Bypass Charge • Integrity Hub • Live Logs • Rescue",
                                         style = top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.body2,
                                         color = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                    )
+                                }
+                                if (!toolsUnlocked) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = Icons.Filled.Lock,
+                                        contentDescription = stringResource(R.string.locked_title),
+                                        tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                             }

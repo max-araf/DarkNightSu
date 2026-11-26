@@ -69,4 +69,5 @@ internal data class InstallScreenActions(
     val onSpoofEnabledChange: (Boolean) -> Unit,
     val onSpoofReleaseChange: (String) -> Unit,
     val onSpoofVersionChange: (String) -> Unit,
+    val onShowMessage: (String) -> Unit = {},
 )

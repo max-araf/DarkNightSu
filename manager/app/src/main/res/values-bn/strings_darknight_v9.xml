@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cmp_title">রুট কম্প্যাটিবিলিটি চেক</string>
+    <string name="cmp_subtitle">আপনার ফোনে নিরাপদে কার্নেল রুট হবে কিনা জানুন</string>
+    <string name="cmp_run">আমার ফোন চেক করুন</string>
+    <string name="cmp_checking">চেক করা হচ্ছে…</string>
+    <string name="cmp_deep_toggle">ডিপ চেক (রুট ব্যবহার করে)</string>
+    <string name="cmp_deep_desc">আপনার বর্তমান ম্যানেজারের (Magisk ইত্যাদি) রুট ব্যবহার করে কার্নেল কনফিগ, লগ ও পার্টিশন পড়ে আরও নির্ভুল ফলাফল দেয়।</string>
+    <string name="cmp_deep_no_root">অন্য ম্যানেজার থেকে রুট লাগবে</string>
+    <string name="cmp_verdict_supported">সাপোর্টেড</string>
+    <string name="cmp_verdict_likely">সম্ভবত সাপোর্টেড</string>
+    <string name="cmp_verdict_risky">ঝুঁকিপূর্ণ</string>
+    <string name="cmp_verdict_unsupported">সাপোর্টেড নয়</string>
+    <string name="cmp_disclaimer">এটি একটি আনুমানিক ফলাফল, নিশ্চয়তা নয়। সবসময় স্টক boot / init_boot ইমেজের ব্যাকআপ রাখুন।</string>
+    <string name="cmp_copy_report">রিপোর্ট কপি</string>
+    <string name="cmp_send_report">ডেভেলপারকে রিপোর্ট পাঠান</string>
+    <string name="cmp_home_chip">কার্নেল রুট: %1$s</string>
+    <string name="cmp_warn_title">ব্রিক হওয়ার ঝুঁকি</string>
+    <string name="cmp_warn_body">এই ফোনটি \"%1$s\" হিসেবে চিহ্নিত। মডিফাইড কার্নেল ফ্ল্যাশ করলে বুটলুপ বা হার্ড ব্রিক হতে পারে। আগে স্টক boot ইমেজের ব্যাকআপ নিন।</string>
+    <string name="cmp_warn_check">আমি ঝুঁকি বুঝেছি এবং আমার ব্যাকআপ আছে</string>
+    <string name="cmp_warn_continue">তবুও চালিয়ে যান</string>
+    <string name="cmp_warn_cancel">বাতিল</string>
+
+    <string name="ext_title">বুট ইমেজ এক্সট্র্যাক্ট</string>
+    <string name="ext_desc">এই ফোন থেকে init_boot, boot, vendor_boot বা recovery .img ফাইল হিসেবে সেভ করুন।</string>
+    <string name="ext_need_root">রুট লাগবে (যেকোনো ম্যানেজার থেকে)।</string>
+    <string name="ext_extract">এক্সট্র্যাক্ট</string>
+    <string name="ext_extracting">এক্সট্র্যাক্ট হচ্ছে…</string>
+    <string name="ext_done">সেভ হয়েছে: %1$s</string>
+    <string name="ext_failed">এক্সট্র্যাক্ট ব্যর্থ: %1$s</string>
+    <string name="ext_sha">SHA-256: %1$s</string>
+    <string name="ext_magic_bad">ইমেজ হেডার অপ্রত্যাশিত। ফ্ল্যাশ করার আগে ভালো করে যাচাই করুন।</string>
+    <string name="ext_no_partitions">এই ফোনে কোনো boot পার্টিশন পাওয়া যায়নি।</string>
+    <string name="ext_nonroot_tip">রুট নেই? ফোনের ফার্মওয়্যার ডাউনলোড করে payload.bin বা AP / boot প্যাকেজ থেকে init_boot.img / boot.img বের করুন।</string>
+    <string name="ext_share">শেয়ার</string>
+
+    <string name="locked_title">লকড</string>
+    <string name="locked_sub">DarkNightSu কার্নেল দিয়ে রুট করলে আনলক হবে</string>
+    <string name="locked_dialog_title">ফিচার লকড</string>
+    <string name="locked_dialog_body">DarkTune ও DarkNight Toolbox শুধু তখনই কাজ করে যখন ফোন DarkNightSu কার্নেল দিয়ে রুট করা থাকে। অন্য ম্যানেজারের রুট যথেষ্ট নয়।</string>
+    <string name="locked_action">আমার ফোন চেক করুন</string>
+    <string name="locked_close">বন্ধ করুন</string>
+
+    <string name="about_icon_github">GitHub সোর্স কোড</string>
+    <string name="about_icon_group">DarkNightSu টেলিগ্রাম গ্রুপ</string>
+    <string name="about_icon_developer">ডেভেলপারের সাথে যোগাযোগ</string>
+</resources>

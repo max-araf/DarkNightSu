@@ -125,6 +125,10 @@ import androidx.compose.ui.graphics.Brush
 import com.kazesu.manager.ui.theme.DarkNightGlassToastHost
 import com.kazesu.manager.ui.theme.DarkNightScreenBackground
 import com.kazesu.manager.ui.component.DarkNightGlassSidebarOverlay
+import com.kazesu.manager.ui.component.LockedFeatureDialog
+import com.kazesu.manager.ui.component.LockedFeatureScreen
+import com.kazesu.manager.ui.util.DarkNightAccess
+import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import com.kazesu.manager.ui.component.DarkNightPillDock
 import com.kazesu.manager.ui.component.DarkNightSideInfoBarOverlay
 import com.kazesu.manager.ui.screen.darknight.DarkNightSideInfoBarSettingsScreen
@@ -475,8 +479,26 @@ class MainActivity : ComponentActivity() {
                                 entry<Route.KernelModules>(swipeDismiss = swipeDismiss)  { DarkNightScreenBackground { KernelModulesScreen() } }
                                 entry<Route.DynamicManagers>(swipeDismiss = swipeDismiss) { DarkNightScreenBackground { DynamicManagersScreen() } }
                                 entry<Route.Extensions>(swipeDismiss = swipeDismiss) { DarkNightScreenBackground { ExtensionsScreen() } }
-                                entry<Route.Tune>(swipeDismiss = swipeDismiss) { DarkNightScreenBackground { TuneScreen() } }
-                                entry<Route.DarkNightToolbox>(swipeDismiss = swipeDismiss) { DarkNightToolboxScreen() }
+                                entry<Route.Tune>(swipeDismiss = swipeDismiss) {
+                                    if (DarkNightAccess.toolsUnlocked()) {
+                                        DarkNightScreenBackground { TuneScreen() }
+                                    } else {
+                                        LockedFeatureScreen(
+                                            onCheckDevice = { navController.push(Route.Install()) },
+                                            onBack = { navController.pop() },
+                                        )
+                                    }
+                                }
+                                entry<Route.DarkNightToolbox>(swipeDismiss = swipeDismiss) {
+                                    if (DarkNightAccess.toolsUnlocked()) {
+                                        DarkNightToolboxScreen()
+                                    } else {
+                                        LockedFeatureScreen(
+                                            onCheckDevice = { navController.push(Route.Install()) },
+                                            onBack = { navController.pop() },
+                                        )
+                                    }
+                                }
                                 entry<Route.DarkNightThemeStudio>(swipeDismiss = swipeDismiss) { DarkNightThemeStudioScreen() }
                                 entry<Route.DarkNightSideInfoBarSettings>(swipeDismiss = swipeDismiss) { DarkNightScreenBackground { DarkNightSideInfoBarSettingsScreen() } }
                                 entry<Route.CpuSpoof>(swipeDismiss = swipeDismiss) { DarkNightScreenBackground { CpuSpoofScreen() } }
@@ -897,6 +919,15 @@ fun MainScreen(
                             )
                     )
 
+                    val toolsUnlocked = rememberDarkNightToolsUnlocked()
+                    var showSidebarLockedDialog by remember { mutableStateOf(false) }
+                    if (showSidebarLockedDialog) {
+                        LockedFeatureDialog(
+                            onCheckDevice = { navController.push(Route.Install()) },
+                            onDismiss = { showSidebarLockedDialog = false },
+                        )
+                    }
+
                     DarkNightGlassSidebarOverlay(
                         palette = sidebarThemeState.palette,
                         selectedPage = mainPagerState.selectedPage,
@@ -904,11 +935,16 @@ fun MainScreen(
                         backdrop = sidebarBackdrop,
                         animationsEnabled = sidebarThemeState.startupAnimEnabled,
                         rootTabsVisible = isFullFeatured,
+                        toolsUnlocked = toolsUnlocked,
+                        onLockedFeatureClick = { showSidebarLockedDialog = true },
                         onSelectPage = { page -> mainPagerState.animateToPage(page) },
                         onOpenDarkTune = { navController.push(Route.Tune) },
                         onOpenToolbox = { navController.push(Route.DarkNightToolbox) },
                         onOpenThemeStudio = { navController.push(Route.ColorPalette()) },
-                        onOpenSendLogs = { navController.push(Route.DarkNightToolbox) },
+                        onOpenSendLogs = {
+                            if (toolsUnlocked) navController.push(Route.DarkNightToolbox)
+                            else showSidebarLockedDialog = true
+                        },
                         onOpenAbout = { navController.push(Route.About) },
                         onExpandedChange = onSidebarExpandedChange,
                     )

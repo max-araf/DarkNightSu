@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kazesu.manager.R
 import com.kazesu.manager.getKernelVersion
+import com.kazesu.manager.ui.component.BootImageExtractorCard
+import com.kazesu.manager.ui.component.RootCompatCheckCard
 import com.kazesu.manager.ui.component.dialog.rememberConfirmDialog
 import com.kazesu.manager.ui.theme.LocalBackgroundImagePath
 import com.kazesu.manager.ui.theme.LocalEnableBlur
@@ -152,6 +154,18 @@ internal fun InstallScreenMiuix(
                 overscrollEffect = null,
             ) {
                 item {
+                    RootCompatCheckCard(
+                        rootAvailable = uiState.rootAvailable,
+                        onShowMessage = actions.onShowMessage,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    BootImageExtractorCard(
+                        rootAvailable = uiState.rootAvailable,
+                        onShowMessage = actions.onShowMessage,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(12.dp))
                     AppCard(
                         modifier = Modifier.fillMaxWidth(),
                     ) {

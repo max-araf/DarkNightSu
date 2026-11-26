@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compatibility checker -->
+    <string name="cmp_title">Root compatibility check</string>
+    <string name="cmp_subtitle">Find out if your phone can get kernel root safely</string>
+    <string name="cmp_run">Check my device</string>
+    <string name="cmp_checking">Checking…</string>
+    <string name="cmp_deep_toggle">Deep check (use root)</string>
+    <string name="cmp_deep_desc">Uses root from your current manager (Magisk etc.) to read kernel config, logs and partitions for a more accurate result.</string>
+    <string name="cmp_deep_no_root">Needs root from another manager</string>
+    <string name="cmp_verdict_supported">Supported</string>
+    <string name="cmp_verdict_likely">Likely supported</string>
+    <string name="cmp_verdict_risky">Risky</string>
+    <string name="cmp_verdict_unsupported">Not supported</string>
+    <string name="cmp_disclaimer">This is a best-effort estimate, not a guarantee. Always keep a backup of your stock boot / init_boot image.</string>
+    <string name="cmp_copy_report">Copy report</string>
+    <string name="cmp_send_report">Send report to developer</string>
+    <string name="cmp_home_chip">Kernel root: %1$s</string>
+    <string name="cmp_warn_title">Brick risk</string>
+    <string name="cmp_warn_body">This device is marked \"%1$s\". Flashing a modified kernel can cause a bootloop or a hard brick. Back up your stock boot image first.</string>
+    <string name="cmp_warn_check">I understand the risk and I have a backup</string>
+    <string name="cmp_warn_continue">Continue anyway</string>
+    <string name="cmp_warn_cancel">Cancel</string>
+
+    <!-- Boot image extractor -->
+    <string name="ext_title">Extract boot image</string>
+    <string name="ext_desc">Save init_boot, boot, vendor_boot or recovery from this phone as an .img file.</string>
+    <string name="ext_need_root">Needs root (from any manager).</string>
+    <string name="ext_extract">Extract</string>
+    <string name="ext_extracting">Extracting…</string>
+    <string name="ext_done">Saved to %1$s</string>
+    <string name="ext_failed">Extraction failed: %1$s</string>
+    <string name="ext_sha">SHA-256: %1$s</string>
+    <string name="ext_magic_bad">Unexpected image header. Double-check before flashing.</string>
+    <string name="ext_no_partitions">No boot partitions found on this device.</string>
+    <string name="ext_nonroot_tip">No root? Download your phone\'s firmware and extract init_boot.img / boot.img from payload.bin or the AP / boot package.</string>
+    <string name="ext_share">Share</string>
+
+    <!-- Locked features -->
+    <string name="locked_title">Locked</string>
+    <string name="locked_sub">Unlocks after you root with a DarkNightSu kernel</string>
+    <string name="locked_dialog_title">Feature locked</string>
+    <string name="locked_dialog_body">DarkTune and DarkNight Toolbox work only when your phone is rooted with a DarkNightSu kernel. Root from another manager is not enough.</string>
+    <string name="locked_action">Check my device</string>
+    <string name="locked_close">Close</string>
+
+    <!-- About icon accessibility labels -->
+    <string name="about_icon_github">GitHub source code</string>
+    <string name="about_icon_group">DarkNightSu Telegram group</string>
+    <string name="about_icon_developer">Contact the developer</string>
+</resources>

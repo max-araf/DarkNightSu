@@ -1,9 +1,26 @@
 package com.kazesu.manager.ui.screen.about
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.sp
 import com.kazesu.manager.ui.theme.DarkNightLinks
+import com.kazesu.manager.ui.theme.LocalDarkNightGlass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -151,29 +168,41 @@ fun AboutScreenMaterial(
                 }
             }
             item {
-                SegmentedColumn(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    content = state.links.filter { it.url.isNotBlank() && it.fullText.isNotBlank() }.map { linkInfo ->
-                        {
-                            SegmentedListItem(
+                val iconLinks = state.links.filter { it.url.isNotBlank() && it.iconRes != 0 }
+                if (iconLinks.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        iconLinks.forEach { linkInfo ->
+                            AboutRoundGlassIconButton(
+                                iconRes = linkInfo.iconRes,
+                                contentDescription = if (linkInfo.contentDescRes != 0) {
+                                    stringResource(linkInfo.contentDescRes)
+                                } else {
+                                    linkInfo.fullText
+                                },
                                 onClick = { actions.onOpenLink(linkInfo.url) },
-                                headlineContent = { Text(linkInfo.fullText) }
                             )
                         }
                     }
-                )
+                }
             }
-            if (DarkNightLinks.SHOW_UPSTREAM_CONTRIBUTORS && contributors.isNotEmpty()) {
+            if (contributors.isNotEmpty()) {
                 item {
+                    val glass = LocalDarkNightGlass.current
                     Row(
-                        modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 16.dp, bottom = 4.dp),
+                        modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.about_contributors),
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = glass.accentText,
                         )
                         Text(
                             text = contributors.size.toString(),
@@ -185,23 +214,60 @@ fun AboutScreenMaterial(
                                 .padding(horizontal = 8.dp, vertical = 2.dp),
                         )
                     }
-                    TonalCard(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        shape = MaterialTheme.shapes.extraLarge,
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(18.dp),
-                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                    contributors.forEach { contributor ->
+                        val avatar = rememberContributorAvatar(contributor.login)
+                        TonalCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = MaterialTheme.shapes.extraLarge,
+                            onClick = { actions.onOpenLink(contributor.profileUrl) },
                         ) {
-                            ContributorWall(
-                                contributors = contributors,
-                                onSelect = { actions.onOpenLink(it.profileUrl) },
-                            )
-                            Text(
-                                text = stringResource(R.string.about_contributors_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(Color.White)
+                                        .border(1.dp, glass.outline, RoundedCornerShape(18.dp)),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (avatar != null) {
+                                        Image(
+                                            bitmap = avatar,
+                                            contentDescription = contributor.login,
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(4.dp),
+                                        )
+                                    }
+                                }
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text = contributor.login.replace('-', ' ').uppercase(),
+                                        color = glass.content,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 2.sp,
+                                    )
+                                    Text(
+                                        text = "@${contributor.login}",
+                                        color = glass.accentText,
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                    )
+                                }
+                            }
                         }
                     }
                     TonalCard(
@@ -224,5 +290,60 @@ fun AboutScreenMaterial(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun AboutRoundGlassIconButton(
+    iconRes: Int,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    val glass = LocalDarkNightGlass.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.92f else 1f,
+        animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f),
+        label = "about_icon_scale",
+    )
+    val fillBrush = if (glass.isDark) {
+        Brush.verticalGradient(
+            listOf(Color.White.copy(alpha = 0.14f), Color.White.copy(alpha = 0.06f))
+        )
+    } else {
+        Brush.verticalGradient(
+            listOf(glass.surface, glass.surfaceHi)
+        )
+    }
+    val borderColor = if (glass.isDark) Color.White.copy(alpha = 0.28f) else glass.outline
+
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(CircleShape)
+            .background(fillBrush)
+            .border(1.dp, borderColor, CircleShape)
+            .semantics {
+                this.contentDescription = contentDescription
+                this.role = Role.Button
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = glass.content,
+            modifier = Modifier.size(26.dp),
+        )
     }
 }

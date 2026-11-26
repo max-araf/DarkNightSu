@@ -100,7 +100,11 @@ import com.kazesu.manager.ui.component.rebootlistpopup.RebootListPopup
 import com.kazesu.manager.ui.component.statustag.StatusTag
 import com.kazesu.manager.ui.component.DarkNightStatusCardMaterial
 import com.kazesu.manager.ui.component.DarkNightStatusKind
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.ui.draw.alpha
+import com.kazesu.manager.ui.component.HomeCompatChip
 import com.kazesu.manager.ui.component.TuneHeroCard
+import com.kazesu.manager.ui.util.CompatReport
 import com.kazesu.manager.ui.theme.LocalBackgroundImagePath
 import com.kazesu.manager.ui.theme.backgroundAwareColor
 import com.kazesu.manager.ui.util.CustomTextKey
@@ -118,6 +122,9 @@ fun HomePagerMaterial(
     state: HomeUiState,
     actions: HomeActions,
     bottomInnerPadding: Dp,
+    toolsUnlocked: Boolean = state.ksuVersion != null,
+    compatReport: CompatReport? = null,
+    onLockedFeatureClick: () -> Unit = actions.onInstallClick,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val hasCustomBackground = LocalBackgroundImagePath.current.isNotEmpty()
@@ -139,12 +146,19 @@ fun HomePagerMaterial(
                 state = state,
                 actions = actions,
             )
+            if (!toolsUnlocked && compatReport != null) {
+                HomeCompatChip(
+                    report = compatReport,
+                    onClick = actions.onInstallClick,
+                )
+            }
             TuneHeroCard(
-                onClick = if (state.isRootAvailable) actions.onOpenTune else actions.onInstallClick,
-                locked = !state.isRootAvailable,
+                onClick = if (toolsUnlocked) actions.onOpenTune else onLockedFeatureClick,
+                locked = !toolsUnlocked,
             )
             DarkNightToolboxCard(
-                onClick = actions.onOpenDarkNightToolbox,
+                onClick = if (toolsUnlocked) actions.onOpenDarkNightToolbox else onLockedFeatureClick,
+                locked = !toolsUnlocked,
             )
 
             if (state.showVersionMismatchWarning) {
@@ -954,10 +968,13 @@ private fun previewHomeScreenState(
 @Composable
 private fun DarkNightToolboxCard(
     onClick: () -> Unit,
+    locked: Boolean = false,
 ) {
     val palette = DarkNightThemeStore.state.value.palette
+    val glass = com.kazesu.manager.ui.theme.LocalDarkNightGlass.current
     DarkNightGlassCard(
         palette = palette,
+        modifier = if (locked) Modifier.alpha(0.55f) else Modifier,
         onClick = onClick,
     ) {
         Row(
@@ -967,21 +984,31 @@ private fun DarkNightToolboxCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "DarkNight Toolbox",
+                    text = stringResource(R.string.darknight_toolbox_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = com.kazesu.manager.ui.theme.LocalDarkNightGlass.current.content,
+                    color = glass.content,
                 )
                 Text(
-                    text = "Game Profiles • Bypass Charge • Integrity Hub • Live Logs • Rescue",
+                    text = if (locked) stringResource(R.string.locked_sub)
+                    else "Game Profiles • Bypass Charge • Integrity Hub • Live Logs • Rescue",
                     style = MaterialTheme.typography.bodySmall,
-                    color = com.kazesu.manager.ui.theme.LocalDarkNightGlass.current.contentSecondary,
+                    color = glass.contentSecondary,
                 )
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_dn_chevron),
-                contentDescription = null,
-                tint = com.kazesu.manager.ui.theme.LocalDarkNightGlass.current.accentText,
-            )
+            if (locked) {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.locked_title),
+                    tint = glass.contentSecondary,
+                    modifier = Modifier.size(18.dp),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_dn_chevron),
+                    contentDescription = null,
+                    tint = glass.accentText,
+                )
+            }
         }
     }
 }

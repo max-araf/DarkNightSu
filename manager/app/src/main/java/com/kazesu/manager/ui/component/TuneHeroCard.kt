@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Lock
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,11 +67,14 @@ private fun TuneHeroCardMaterial(
         shape = MaterialTheme.shapes.extraLarge,
         onClick = onClick,
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (locked) Modifier.alpha(0.55f) else Modifier),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .then(if (locked) Modifier.alpha(0.45f) else Modifier)
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -85,7 +88,7 @@ private fun TuneHeroCardMaterial(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = stringResource(R.string.kernel_tuning_tagline),
+                        text = stringResource(if (locked) R.string.locked_sub else R.string.kernel_tuning_tagline),
                         fontSize = 14.sp,
                         maxLines = 2,
                     )
@@ -93,7 +96,15 @@ private fun TuneHeroCardMaterial(
                 DarkNightLogo(size = 44.dp)
             }
             if (locked) {
-                LockedHint()
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.locked_title),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
             }
         }
     }
@@ -105,39 +116,54 @@ private fun TuneHeroCardMiuix(
     modifier: Modifier,
     locked: Boolean,
 ) {
-    AppCard(modifier = modifier.fillMaxWidth()) {
-        Row(
+    AppCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (locked) Modifier.alpha(0.55f) else Modifier),
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .clickable(onClick = onClick),
         ) {
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .then(if (locked) Modifier.alpha(0.45f) else Modifier),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                MiuixText(
-                    text = stringResource(R.string.kernel_tuning),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface,
-                    maxLines = 1,
-                )
-                MiuixText(
-                    text = stringResource(R.string.kernel_tuning_tagline),
-                    fontSize = 13.sp,
-                    color = colorScheme.onSurfaceVariantSummary,
-                    maxLines = 2,
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    MiuixText(
+                        text = stringResource(R.string.kernel_tuning),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onSurface,
+                        maxLines = 1,
+                    )
+                    MiuixText(
+                        text = stringResource(if (locked) R.string.locked_sub else R.string.kernel_tuning_tagline),
+                        fontSize = 13.sp,
+                        color = colorScheme.onSurfaceVariantSummary,
+                        maxLines = 2,
+                    )
+                }
+                DarkNightLogo(size = 44.dp)
+            }
+            if (locked) {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.locked_title),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(18.dp),
+                    tint = colorScheme.onSurfaceVariantSummary,
                 )
             }
-            DarkNightLogo(size = 44.dp)
-        }
-        if (locked) {
-            LockedHint()
         }
     }
 }
@@ -154,7 +180,7 @@ private fun LockedHint() {
     ) {
         if (mode == UiMode.Material) {
             Icon(
-                imageVector = Icons.TwoTone.Lock,
+                imageVector = Icons.Filled.Lock,
                 contentDescription = null,
                 modifier = Modifier.size(22.dp),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,

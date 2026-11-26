@@ -49,6 +49,9 @@ import com.kazesu.manager.ui.util.CustomTextKey
 import com.kazesu.manager.ui.util.customText
 import com.kazesu.manager.ui.navigation3.Navigator
 import com.kazesu.manager.ui.navigation3.Route
+import com.kazesu.manager.ui.component.LockedFeatureDialog
+import com.kazesu.manager.ui.util.RootCompatChecker
+import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import com.kazesu.manager.ui.util.rootAvailable
 import com.kazesu.manager.ui.viewmodel.HomeViewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -128,6 +131,22 @@ fun HomePager(
     }
 
     val mainPagerState = LocalMainPagerState.current
+    val toolsUnlocked = rememberDarkNightToolsUnlocked()
+    val compatReport by RootCompatChecker.latest.collectAsStateWithLifecycle()
+    var showLockedDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(toolsUnlocked) {
+        if (!toolsUnlocked && RootCompatChecker.latest.value == null) {
+            runCatching { RootCompatChecker.run(deep = false) }
+        }
+    }
+
+    if (showLockedDialog) {
+        LockedFeatureDialog(
+            onCheckDevice = { navigator.push(Route.Install()) },
+            onDismiss = { showLockedDialog = false },
+        )
+    }
     val themeStoreTitle = customText(CustomTextKey.PAGE_THEME_STORE)
     val themeStoreConfirmContent = stringResource(R.string.theme_store_open_confirm)
     val themeStoreConfirmDialog = rememberConfirmDialog(
@@ -171,12 +190,18 @@ fun HomePager(
             state = state,
             actions = actions,
             bottomInnerPadding = bottomInnerPadding,
+            toolsUnlocked = toolsUnlocked,
+            compatReport = compatReport,
+            onLockedFeatureClick = { showLockedDialog = true },
         )
 
         UiMode.Material -> HomePagerMaterial(
             state = state,
             actions = actions,
             bottomInnerPadding = bottomInnerPadding,
+            toolsUnlocked = toolsUnlocked,
+            compatReport = compatReport,
+            onLockedFeatureClick = { showLockedDialog = true },
         )
     }
 }

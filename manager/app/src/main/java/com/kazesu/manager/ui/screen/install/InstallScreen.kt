@@ -44,6 +44,7 @@ import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalResources
+import com.kazesu.manager.ui.component.BrickGuardDialog
 import com.kazesu.manager.ui.component.dialog.DownloadDialog
 import com.kazesu.manager.ui.util.*
 import top.yukonga.miuix.kmp.basic.SnackbarHostState as MiuixSnackbarHostState
@@ -208,7 +209,8 @@ fun InstallScreen(
     }
 
     val blockModulesInvalidMessage = stringResource(R.string.install_block_modules_invalid)
-    val onInstall = {
+    var pendingBrickReport by remember { mutableStateOf<CompatReport?>(null) }
+    val performFlash: () -> Unit = {
         if (isStandaloneKpm) {
             if (!rootAvailable && kpmBootUri == null) {
                 showMessage(resources.getString(R.string.install_kpm_manual_required))
@@ -275,6 +277,35 @@ fun InstallScreen(
                 }
             }
         }
+    }
+    val onInstall: () -> Unit = {
+        scope.launch {
+            var report = RootCompatChecker.latest.value
+            if (report == null) {
+                loadingDialog.showLoading()
+                report = try {
+                    RootCompatChecker.run(deep = false)
+                } finally {
+                    loadingDialog.hide()
+                }
+            }
+            if (report != null && report.needsBrickWarning) {
+                pendingBrickReport = report
+            } else {
+                performFlash()
+            }
+        }
+    }
+
+    pendingBrickReport?.let { guardReport ->
+        BrickGuardDialog(
+            report = guardReport,
+            onConfirm = {
+                pendingBrickReport = null
+                performFlash()
+            },
+            onDismiss = { pendingBrickReport = null },
+        )
     }
 
     ChooseKmiDialog(
@@ -525,7 +556,8 @@ fun InstallScreen(
         },
         onBlockModulesChange = {
             blockModules = it
-        }
+        },
+        onShowMessage = ::showMessage,
     )
 
     when (LocalUiMode.current) {

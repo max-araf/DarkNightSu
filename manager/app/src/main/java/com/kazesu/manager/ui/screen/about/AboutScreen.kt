@@ -38,9 +38,24 @@ fun AboutScreen() {
     val viewModel = viewModel<SettingsViewModel>()
     val settingsState by viewModel.uiState.collectAsStateWithLifecycle()
     val aboutLinks = listOf(
-        LinkInfo(stringResource(R.string.about_link_source), DarkNightLinks.REPO_URL),
-        LinkInfo(stringResource(R.string.about_link_group), DarkNightLinks.TELEGRAM_GROUP_URL),
-        LinkInfo(stringResource(R.string.about_link_developer), DarkNightLinks.DEVELOPER_TELEGRAM_URL),
+        LinkInfo(
+            fullText = stringResource(R.string.about_icon_github),
+            url = DarkNightLinks.REPO_URL,
+            iconRes = R.drawable.ic_link_github,
+            contentDescRes = R.string.about_icon_github,
+        ),
+        LinkInfo(
+            fullText = stringResource(R.string.about_icon_group),
+            url = DarkNightLinks.TELEGRAM_GROUP_URL,
+            iconRes = R.drawable.ic_link_telegram,
+            contentDescRes = R.string.about_icon_group,
+        ),
+        LinkInfo(
+            fullText = stringResource(R.string.about_icon_developer),
+            url = DarkNightLinks.DEVELOPER_TELEGRAM_URL,
+            iconRes = R.drawable.ic_link_developer,
+            contentDescRes = R.string.about_icon_developer,
+        ),
     )
     val state = AboutUiState(
         title = customText(CustomTextKey.PAGE_ABOUT),

@@ -64,7 +64,7 @@ import androidx.core.graphics.withClip
 
 private const val WordmarkWord = "DARKNIGHTSU"
 private const val WordmarkWidth = 1000f
-private const val WordmarkHeight = 220f
+private const val WordmarkHeight = 300f
 private const val MaxWordmarkZoom = 8f
 private const val CharacterColumnWidth = 8f
 private const val CharacterRowHeight = 10f
@@ -144,7 +144,7 @@ fun ContributorNameWordmark(names: List<String>, modifier: Modifier = Modifier) 
 }
 
 private fun buildWordmarkPath(names: List<String>): Path {
-    val letters = Path().apply { addWord(WordmarkWord, RectF(24f, 40f, 976f, 180f)) }
+    val letters = Path().apply { addWord(WordmarkWord, RectF(30f, 30f, 970f, 270f)) }
     val region = Region().apply {
         setPath(letters, Region(0, 0, WordmarkWidth.toInt(), WordmarkHeight.toInt()))
     }

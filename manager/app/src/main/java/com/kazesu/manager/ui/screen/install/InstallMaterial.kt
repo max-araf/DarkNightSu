@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.kazesu.manager.R
 import com.kazesu.manager.getKernelVersion
 import com.kazesu.manager.ui.kernelFlash.KpmPatchOption
+import com.kazesu.manager.ui.component.BootImageExtractorCard
+import com.kazesu.manager.ui.component.RootCompatCheckCard
 import com.kazesu.manager.ui.component.dialog.rememberConfirmDialog
 import com.kazesu.manager.ui.component.material.ExpressiveScaffold
 import com.kazesu.manager.ui.component.material.SegmentedCheckboxItem
@@ -113,6 +115,16 @@ internal fun InstallScreenMaterial(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(13.dp)
         ) {
+            RootCompatCheckCard(
+                rootAvailable = uiState.rootAvailable,
+                onShowMessage = actions.onShowMessage,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+            BootImageExtractorCard(
+                rootAvailable = uiState.rootAvailable,
+                onShowMessage = actions.onShowMessage,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
             SelectInstallMethod(
                 state = uiState,
                 onSelected = actions.onSelectMethod,

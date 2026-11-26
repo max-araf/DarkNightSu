@@ -35,6 +35,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -216,6 +218,7 @@ private data class SidebarMenuItem(
     val labelRes: Int,
     val iconRes: Int,
     val badgeCount: Int = 0,
+    val locked: Boolean = false,
     val onClick: () -> Unit,
 )
 
@@ -234,6 +237,8 @@ fun DarkNightGlassSidebarOverlay(
     onOpenAbout: () -> Unit,
     onExpandedChange: (Boolean) -> Unit = {},
     rootTabsVisible: Boolean = true,
+    toolsUnlocked: Boolean = true,
+    onLockedFeatureClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -257,9 +262,23 @@ fun DarkNightGlassSidebarOverlay(
         if (rootTabsVisible) {
             add(SidebarMenuItem("superuser", R.string.superuser, R.drawable.ic_dn_superuser) { onSelectPage(1) })
             add(SidebarMenuItem("module", R.string.module, R.drawable.ic_dn_module, badgeCount = moduleBadgeCount) { onSelectPage(2) })
-            add(SidebarMenuItem("darktune", R.string.kernel_tuning, R.drawable.ic_dn_darktune) { onOpenDarkTune() })
         }
-        add(SidebarMenuItem("toolbox", R.string.darknight_toolbox_title, R.drawable.ic_dn_toolbox) { onOpenToolbox() })
+        add(
+            SidebarMenuItem(
+                id = "darktune",
+                labelRes = R.string.kernel_tuning,
+                iconRes = R.drawable.ic_dn_darktune,
+                locked = !toolsUnlocked,
+            ) { if (toolsUnlocked) onOpenDarkTune() else onLockedFeatureClick() }
+        )
+        add(
+            SidebarMenuItem(
+                id = "toolbox",
+                labelRes = R.string.darknight_toolbox_title,
+                iconRes = R.drawable.ic_dn_toolbox,
+                locked = !toolsUnlocked,
+            ) { if (toolsUnlocked) onOpenToolbox() else onLockedFeatureClick() }
+        )
     }
 
     val systemItems = listOf(
@@ -683,7 +702,25 @@ private fun RailIconButton(
                     tint = if (selected) contrastOn(palette.primaryGlow) else LocalDarkNightGlass.current.content.copy(alpha = 0.72f),
                     modifier = Modifier.size(22.dp),
                 )
-                if (item.badgeCount > 0) {
+                if (item.locked) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 5.dp, y = (-5).dp)
+                            .size(15.dp)
+                            .clip(CircleShape)
+                            .background(LocalDarkNightGlass.current.surface)
+                            .border(1.dp, LocalDarkNightGlass.current.outline, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Lock,
+                            contentDescription = stringResource(R.string.locked_title),
+                            tint = LocalDarkNightGlass.current.contentSecondary,
+                            modifier = Modifier.size(9.dp),
+                        )
+                    }
+                } else if (item.badgeCount > 0) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -790,7 +827,14 @@ private fun DrawerMenuRow(
                 overflow = TextOverflow.Clip,
                 modifier = Modifier.weight(1f),
             )
-            if (selected) {
+            if (item.locked) {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.locked_title),
+                    tint = LocalDarkNightGlass.current.contentSecondary,
+                    modifier = Modifier.size(16.dp),
+                )
+            } else if (selected) {
                 Icon(
                     painter = painterResource(R.drawable.ic_dn_chevron),
                     contentDescription = null,
