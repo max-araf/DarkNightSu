@@ -72,7 +72,10 @@ import com.kazesu.manager.ui.component.material.SnackBarHost
 import com.kazesu.manager.ui.component.material.TopBarBackButton
 import com.kazesu.manager.ui.component.material.expressiveTopAppBarColors
 import com.kazesu.manager.ui.util.LkmSelection
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import com.kazesu.manager.ui.util.isAbDevice
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 /**
  * @author weishu
@@ -89,9 +92,8 @@ internal fun InstallScreenMaterial(
     val isAbDevice by produceState(initialValue = false) {
         value = isAbDevice()
     }
-    val isGkiDevice by produceState(initialValue = false) {
-        value = getKernelVersion().isGKI()
-    }
+    val isGkiDevice = uiState.isGkiDevice
+    val navBottom = rememberNavBottom()
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
@@ -105,6 +107,21 @@ internal fun InstallScreenMaterial(
             )
         },
         snackbarHost = { SnackBarHost(hostState = snackBarHost, modifier = Modifier.safeDrawingPadding()) },
+        bottomBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.92f),
+                tonalElevation = 2.dp,
+            ) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 10.dp, bottom = navBottom + 16.dp),
+                    enabled = uiState.canInstall,
+                    onClick = actions.onNext,
+                ) { Text(stringResource(R.string.install_next)) }
+            }
+        },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
     ) { innerPadding ->
         Column(
@@ -132,6 +149,15 @@ internal fun InstallScreenMaterial(
                 onDownloadFile = actions.onDownloadFile,
                 onSelectBootImage = actions.onSelectBootImage,
             )
+            uiState.pickedBootInfo?.takeIf { it.valid }?.let { info ->
+                val kindText = stringResource(if (info.gkiFormat) R.string.patch_boot_gki else R.string.patch_boot_nongki)
+                Text(
+                    text = stringResource(R.string.patch_boot_info, info.headerVersion, kindText),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (info.lkmPatchable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
 
             SegmentedColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -386,13 +412,7 @@ internal fun InstallScreenMaterial(
                     }
                 }
             }
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                enabled = uiState.canInstall,
-                onClick = actions.onNext
-            ) { Text(stringResource(R.string.install_next)) }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

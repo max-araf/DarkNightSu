@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.extensions
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -110,7 +111,7 @@ fun ExtensionsScreenMaterial(
             )
             Spacer(
                 Modifier.height(
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    rememberNavBottom(),
                 ),
             )
         }

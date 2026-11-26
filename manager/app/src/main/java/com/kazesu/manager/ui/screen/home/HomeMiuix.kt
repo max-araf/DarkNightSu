@@ -73,6 +73,7 @@ import com.kazesu.manager.ui.component.miuix.WarningCard
 import com.kazesu.manager.ui.component.rebootlistpopup.RebootListPopupMiuix
 import com.kazesu.manager.ui.component.statustag.StatusTag
 import com.kazesu.manager.ui.component.DarkNightStatusCardMiuix
+import com.kazesu.manager.ui.util.rememberNavBottom
 import com.kazesu.manager.ui.component.DarkNightStatusKind
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.ui.draw.alpha
@@ -266,9 +267,7 @@ fun HomePagerMiuix(
                             onOpenUrl = actions.onOpenUrl,
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        Spacer(
-                            Modifier.height(
-                                bottomInnerPadding + 24.dp + if (!Natives.isFullFeatured())
+                        Spacer(Modifier.height(maxOf(bottomInnerPadding, rememberNavBottom()) + 24.dp))
                                     WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp
                             )
                         )
@@ -340,7 +339,7 @@ private fun TopBar(
     BlurredBar(backdrop = backdrop, scrollBehavior = scrollBehavior) {
         TopAppBar(
             color = Color.Transparent,
-            title = customText(CustomTextKey.HOME_TITLE),
+            title = stringResource(R.string.brand_wordmark),
             navigationIcon = {
                 IconButton(onClick = onOpenThemeStore) {
                     Icon(
@@ -806,14 +805,15 @@ private fun InfoCard(
             if (!systemInfo.kernelFullVersion.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_KERNEL_FULL) to systemInfo.kernelFullVersion)
             }
-            if (isSusfsSupported) {
-                add(stringResource(R.string.home_susfs_version) to susfsInfo.detail)
-            } else if (!hookTypeLabel.isNullOrBlank()) {
+            if (!isSusfsSupported && !hookTypeLabel.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_HOOK_TYPE) to hookTypeLabel)
             }
             if (!systemInfo.zygiskImplementation.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_ZYGISK) to systemInfo.zygiskImplementation)
             }
+        }
+        if (isSusfsSupported) {
+            add(stringResource(R.string.home_susfs_version) to susfsInfo.detail)
         }
         add(customText(CustomTextKey.HOME_INFO_DEVICE_MODEL) to systemInfo.deviceModel)
         add(customText(CustomTextKey.HOME_INFO_FINGERPRINT) to systemInfo.fingerprint)

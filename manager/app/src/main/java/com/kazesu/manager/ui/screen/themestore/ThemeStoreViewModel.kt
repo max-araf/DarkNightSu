@@ -1,6 +1,7 @@
 package com.kazesu.manager.ui.screen.themestore
 
 import android.app.Application
+import android.util.Log
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -190,6 +191,7 @@ data class ThemeStoreUiState(
     val downloaded: DownloadedTheme? = null,
     val verifiedThemeKey: String? = null,
     val downloadFailed: Boolean = false,
+    val downloadErrorDetail: String? = null,
     val submitting: Boolean = false,
     val uploadError: String? = null,
     val uploadSubmitted: Boolean = false,
@@ -900,6 +902,7 @@ class ThemeStoreViewModel(application: Application) : AndroidViewModel(applicati
                 downloadSpeedBytesPerSecond = 0L,
                 downloadEtaSeconds = null,
                 downloadFailed = false,
+                downloadErrorDetail = null,
                 verifiedThemeKey = null,
             )
         }
@@ -960,7 +963,17 @@ class ThemeStoreViewModel(application: Application) : AndroidViewModel(applicati
                     }
                     recordDownload(item)
                 },
-                onFailure = {
+                onFailure = { err ->
+                    val detail = buildString {
+                        val msg = err.message?.trim().orEmpty()
+                        if (msg.startsWith("HTTP ") || msg.startsWith("Server refused")) {
+                            append(msg)
+                        } else {
+                            append(err::class.simpleName ?: "Error")
+                            if (msg.isNotBlank()) append(": ").append(msg)
+                        }
+                    }
+                    Log.d("DarkNightTheme", "Download failed id=${item.entry.id} r18=${item.r18} base=${item.source.baseUrl} path=${item.entry.path}: $detail", err)
                     _uiState.update {
                         it.copy(
                             downloadingKey = null,
@@ -971,6 +984,7 @@ class ThemeStoreViewModel(application: Application) : AndroidViewModel(applicati
                             downloadSpeedBytesPerSecond = 0L,
                             downloadEtaSeconds = null,
                             downloadFailed = true,
+                            downloadErrorDetail = detail,
                         )
                     }
                 },
@@ -983,7 +997,7 @@ class ThemeStoreViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun clearDownloadError() {
-        _uiState.update { it.copy(downloadFailed = false) }
+        _uiState.update { it.copy(downloadFailed = false, downloadErrorDetail = null) }
     }
 
     fun submit(input: ThemeStoreUploadInput, source: ThemeStoreSource) {

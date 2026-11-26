@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.darknight
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -137,7 +138,7 @@ fun DarkNightToolboxScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding()
+                .padding(bottom = rememberNavBottom() + 24.dp)
         ) {
             // Top bar matching Zentra clean header
             Row(

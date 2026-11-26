@@ -50,8 +50,24 @@ internal fun ExtensionStatusRow(
 ) {
     val state = item.state
     val pill = pillFor(state)
-    val (background, foreground) = statusTagColors(pill)
-    val lifecycle = extensionLifecycleText(state)
+    val isSusfs = item.wireName == "susfs"
+    val isKpmUnsupported = item.wireName == "kpm" && !state.supported
+    val (background, foreground) = if (isSusfs) {
+        if (state.supported) Color(0xFF16A34A) to Color.White
+        else Color(0xFFDC2626) to Color.White
+    } else {
+        statusTagColors(pill)
+    }
+    val tagLabel = when {
+        isKpmUnsupported -> "Unsupported (kernel built without KPM)"
+        isSusfs && state.supported -> stringResource(R.string.extension_status_supported)
+        else -> stringResource(pill.labelRes)
+    }
+    val lifecycle = if (isSusfs && state.supported && !item.versionLabel.isNullOrBlank()) {
+        item.versionLabel
+    } else {
+        extensionLifecycleText(state)
+    }
     val lifecycleStyle: TextStyle
     val lifecycleColor: Color
     when (LocalUiMode.current) {
@@ -71,7 +87,7 @@ internal fun ExtensionStatusRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         StatusTag(
-            label = stringResource(pill.labelRes),
+            label = tagLabel,
             backgroundColor = background,
             contentColor = foreground,
         )

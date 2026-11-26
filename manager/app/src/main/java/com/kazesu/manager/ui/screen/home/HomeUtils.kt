@@ -7,8 +7,7 @@ import androidx.core.content.pm.PackageInfoCompat
 import com.kazesu.manager.Natives
 import com.kazesu.manager.Natives.isManager
 import com.kazesu.manager.ui.util.ZygiskImplementationInfo
-import com.kazesu.manager.ui.util.getSuSFSStatus
-import com.kazesu.manager.ui.util.getSuSFSVersion
+import com.kazesu.manager.ui.util.SusfsDetector
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 
@@ -75,9 +74,9 @@ fun rememberSusfsInfo(
 ): SusfsInfoState {
     return remember(manualHookLabel, inlineHookLabel) {
         runCatching {
-            val supported = getSuSFSStatus().equals("true", ignoreCase = true)
-            if (supported) {
-                val version = getSuSFSVersion().trim()
+            val detected = SusfsDetector.detect()
+            if (detected.supported) {
+                val version = detected.version
                 val hookLabel = when (val type = Natives.getHookType()) {
                     "Manual" -> manualHookLabel
                     "Inline" -> inlineHookLabel

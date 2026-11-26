@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.themestore
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -251,7 +252,7 @@ internal fun ThemeStoreDetailScreen(
                 .padding(paddingValues),
             contentPadding = PaddingValues(
                 top = 8.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 32.dp,
+                bottom = rememberNavBottom() + 32.dp,
             ),
         ) {
             item(key = "gallery") {

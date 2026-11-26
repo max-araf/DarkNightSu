@@ -99,6 +99,8 @@ import com.kazesu.manager.ui.component.material.expressiveTopAppBarColors
 import com.kazesu.manager.ui.component.rebootlistpopup.RebootListPopup
 import com.kazesu.manager.ui.component.statustag.StatusTag
 import com.kazesu.manager.ui.component.DarkNightStatusCardMaterial
+import com.kazesu.manager.ui.component.DarkNightWordmark
+import com.kazesu.manager.ui.util.rememberNavBottom
 import com.kazesu.manager.ui.component.DarkNightStatusKind
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.ui.draw.alpha
@@ -210,10 +212,10 @@ fun HomePagerMaterial(
             StatsRow(state = state, actions = actions)
             InfoCard(systemInfo = state.systemInfo, showFullStatus = state.showFullStatus)
             SupportLinks(onOpenUrl = actions.onOpenUrl)
+            val navBottom = rememberNavBottom()
             Spacer(
                 Modifier.height(
-                    bottomInnerPadding + 24.dp + if (!Natives.isFullFeatured())
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp
+                    maxOf(bottomInnerPadding, navBottom) + 24.dp
                 )
             )
         }
@@ -277,14 +279,9 @@ private fun TopBar(
     onOpenThemeStore: () -> Unit = {},
 ) {
     val hasCustomBackground = LocalBackgroundImagePath.current.isNotEmpty()
-    val displayTitle = customText(CustomTextKey.HOME_TITLE)
     LargeFlexibleTopAppBar(
         title = {
-            Text(
-                text = displayTitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            DarkNightWordmark()
         },
         navigationIcon = {
             IconButton(onClick = onOpenThemeStore) {
@@ -809,14 +806,15 @@ private fun InfoCard(
             if (!systemInfo.kernelFullVersion.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_KERNEL_FULL) to systemInfo.kernelFullVersion)
             }
-            if (isSusfsSupported) {
-                add(stringResource(R.string.home_susfs_version) to susfsInfo.detail)
-            } else if (!hookTypeLabel.isNullOrBlank()) {
+            if (!isSusfsSupported && !hookTypeLabel.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_HOOK_TYPE) to hookTypeLabel)
             }
             if (!systemInfo.zygiskImplementation.isNullOrBlank()) {
                 add(customText(CustomTextKey.HOME_INFO_ZYGISK) to systemInfo.zygiskImplementation)
             }
+        }
+        if (isSusfsSupported) {
+            add(stringResource(R.string.home_susfs_version) to susfsInfo.detail)
         }
         add(customText(CustomTextKey.HOME_INFO_DEVICE_MODEL) to systemInfo.deviceModel)
         add(customText(CustomTextKey.HOME_INFO_FINGERPRINT) to systemInfo.fingerprint)

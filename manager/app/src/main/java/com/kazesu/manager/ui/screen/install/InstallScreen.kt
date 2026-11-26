@@ -16,6 +16,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.kazesu.manager.ui.component.GlassDialog
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -124,9 +130,26 @@ fun InstallScreen(
     val currentKmi by produceState(initialValue = "") { value = getCurrentKmi() }
     val partitions by produceState(initialValue = emptyList()) { value = getAvailablePartitions() }
     val defaultPartition by produceState(initialValue = "") { value = getDefaultPartition() }
-    val rootAvailable by produceState(initialValue = false) { value = rootAvailable() }
+    var rootAvailable by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        rootAvailable = withContext(Dispatchers.IO) { rootAvailable() || RootExec.isRoot() }
+    }
+    LifecycleResumeEffect(Unit) {
+        val job = scope.launch {
+            rootAvailable = withContext(Dispatchers.IO) { rootAvailable() || RootExec.isRoot() }
+        }
+        onPauseOrDispose { job.cancel() }
+    }
     val isAbDevice by produceState(initialValue = false) { value = isAbDevice() }
-    val isGkiDevice by produceState(initialValue = false) { value = getKernelVersion().isGKI() }
+    val rawIsGkiDevice by produceState(initialValue = false) { value = getKernelVersion().isGKI() }
+    val latestCompatReport by RootCompatChecker.latest.collectAsStateWithLifecycle()
+    val isGkiDevice = when (latestCompatReport?.rootPath) {
+        RootPath.LKM_GKI -> true
+        RootPath.KERNEL_BUILTIN -> false
+        null -> rawIsGkiDevice
+    }
+    var pickedBootInfo by remember { mutableStateOf<BootImageInspector.Info?>(null) }
+    var blockedBootDialogInfo by remember { mutableStateOf<BootImageInspector.Info?>(null) }
 
     val selectFileTip = stringResource(id = R.string.select_file_tip, defaultPartition)
 
@@ -312,6 +335,40 @@ fun InstallScreen(
         )
     }
 
+    blockedBootDialogInfo?.let { badInfo ->
+        when (badInfo.problem) {
+            BootImageInspector.Problem.NON_GKI_HEADER -> {
+                GlassDialog(
+                    title = stringResource(R.string.patch_blocked_title),
+                    message = stringResource(R.string.patch_blocked_body, badInfo.headerVersion),
+                    primaryLabel = stringResource(R.string.patch_blocked_action),
+                    onPrimary = {
+                        blockedBootDialogInfo = null
+                        installMethod = InstallMethod.HorizonKernel(summary = horizonKernelSummary)
+                    },
+                    secondaryLabel = stringResource(R.string.close),
+                    onSecondary = { blockedBootDialogInfo = null },
+                    onDismiss = { blockedBootDialogInfo = null },
+                )
+            }
+            else -> {
+                val msgRes = when (badInfo.problem) {
+                    BootImageInspector.Problem.ARCHIVE_OR_COMPRESSED -> R.string.flash_diag_archive
+                    BootImageInspector.Problem.VENDOR_BOOT_SELECTED -> R.string.flash_diag_vendor_boot
+                    BootImageInspector.Problem.TOO_SMALL -> R.string.flash_diag_too_small
+                    else -> R.string.flash_diag_wrong_file
+                }
+                GlassDialog(
+                    title = stringResource(R.string.patch_blocked_title),
+                    message = stringResource(msgRes),
+                    primaryLabel = stringResource(R.string.close),
+                    onPrimary = { blockedBootDialogInfo = null },
+                    onDismiss = { blockedBootDialogInfo = null },
+                )
+            }
+        }
+    }
+
     ChooseKmiDialog(
         show = showChooseKmiDialog.value,
         onDismissRequest = { showChooseKmiDialog.value = false },
@@ -378,19 +435,29 @@ fun InstallScreen(
         val uri = it.data?.data
         if (it.resultCode != Activity.RESULT_OK || uri == null) {
             installMethod = null
+            pickedBootInfo = null
             return@rememberLauncherForActivityResult
         }
-        val option = when (installMethod) {
-            is InstallMethod.SelectFile -> InstallMethod.SelectFile(uri, summary = selectFileTip)
-            is InstallMethod.HorizonKernel -> InstallMethod.HorizonKernel(uri, summary = horizonKernelSummary)
-            else -> null
-        }
-        option?.let { opt ->
-            installMethod = opt
-            // 对于 HorizonKernel，需要触发 AnyKernel3 流程（槽位选择和 KPM 修补）
-            if (opt is InstallMethod.HorizonKernel) {
+        when (installMethod) {
+            is InstallMethod.SelectFile -> {
+                scope.launch {
+                    val info = withContext(Dispatchers.IO) { BootImageInspector.inspect(context, uri) }
+                    pickedBootInfo = info
+                    if (info.lkmPatchable) {
+                        installMethod = InstallMethod.SelectFile(uri, summary = selectFileTip)
+                    } else {
+                        installMethod = null
+                        blockedBootDialogInfo = info
+                    }
+                }
+            }
+            is InstallMethod.HorizonKernel -> {
+                pickedBootInfo = null
+                val opt = InstallMethod.HorizonKernel(uri, summary = horizonKernelSummary)
+                installMethod = opt
                 anyKernel3State.onHorizonKernelSelected(opt)
             }
+            else -> Unit
         }
     }
 
@@ -434,6 +501,7 @@ fun InstallScreen(
         spoofEnabled = spoofEnabled,
         spoofRelease = spoofRelease,
         spoofVersion = spoofVersion,
+        pickedBootInfo = pickedBootInfo,
     )
     val actions = InstallScreenActions(
         onBack = dropUnlessResumed { navigator.pop() },
@@ -474,6 +542,13 @@ fun InstallScreen(
             }
         },
         onNext = {
+            if (installMethod is InstallMethod.SelectFile) {
+                val info = pickedBootInfo
+                if (info != null && !info.lkmPatchable) {
+                    blockedBootDialogInfo = info
+                    return@InstallScreenActions
+                }
+            }
             val isLkmSelected = lkmSelection != LkmSelection.KmiNone
             val isKmiUnknown = currentKmi.isBlank()
             val isKmiUnresolved = when (installMethod) {

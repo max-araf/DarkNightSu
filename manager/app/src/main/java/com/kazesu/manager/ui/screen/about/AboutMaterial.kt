@@ -36,7 +36,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import com.kazesu.manager.ui.util.rememberNavBottom
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -230,24 +233,16 @@ fun AboutScreenMaterial(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(72.dp)
-                                        .clip(RoundedCornerShape(18.dp))
-                                        .background(Color.White)
-                                        .border(1.dp, glass.outline, RoundedCornerShape(18.dp)),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    if (avatar != null) {
-                                        Image(
-                                            bitmap = avatar,
-                                            contentDescription = contributor.login,
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(4.dp),
-                                        )
-                                    }
+                                if (avatar != null) {
+                                    Image(
+                                        bitmap = avatar,
+                                        contentDescription = contributor.login,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .width(132.dp)
+                                            .aspectRatio(3f / 2f)
+                                            .clip(RoundedCornerShape(16.dp)),
+                                    )
                                 }
                                 Column(
                                     modifier = Modifier.weight(1f),
@@ -282,12 +277,7 @@ fun AboutScreenMaterial(
                 }
             }
             item {
-                Spacer(
-                    Modifier.height(
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-                    )
-                )
+                Spacer(Modifier.height(rememberNavBottom() + 24.dp))
             }
         }
     }

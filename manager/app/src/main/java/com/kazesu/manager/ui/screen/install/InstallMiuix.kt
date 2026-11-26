@@ -68,7 +68,9 @@ import com.kazesu.manager.ui.theme.backgroundAwareColor
 import com.kazesu.manager.ui.util.BlurredBar
 import com.kazesu.manager.ui.util.LkmSelection
 import com.kazesu.manager.ui.util.rememberBlurBackdrop
+import androidx.compose.foundation.background
 import com.kazesu.manager.ui.util.isAbDevice
+import com.kazesu.manager.ui.util.rememberNavBottom
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -119,9 +121,8 @@ internal fun InstallScreenMiuix(
     val isAbDevice by produceState(initialValue = false) {
         value = isAbDevice()
     }
-    val isGkiDevice by produceState(initialValue = false) {
-        value = getKernelVersion().isGKI()
-    }
+    val isGkiDevice = uiState.isGkiDevice
+    val navBottom = rememberNavBottom()
 
     AppScaffold(
         topBar = {
@@ -136,8 +137,25 @@ internal fun InstallScreenMiuix(
         snackbarHost = {
             SnackbarHost(
                 state = snackbarHost,
-                modifier = Modifier.padding(bottom = 20.dp),
+                modifier = Modifier.padding(bottom = navBottom + 20.dp),
             )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colorScheme.surface.copy(alpha = 0.92f))
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 10.dp, bottom = navBottom + 16.dp),
+            ) {
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.install_next),
+                    enabled = uiState.canInstall,
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    onClick = actions.onNext,
+                )
+            }
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
     ) { innerPadding ->
@@ -175,6 +193,15 @@ internal fun InstallScreenMiuix(
                             onSelected = actions.onSelectMethod,
                             onDownloadFile = actions.onDownloadFile,
                             onSelectBootImage = actions.onSelectBootImage,
+                        )
+                    }
+                    uiState.pickedBootInfo?.takeIf { it.valid }?.let { info ->
+                        val kindText = stringResource(if (info.gkiFormat) R.string.patch_boot_gki else R.string.patch_boot_nongki)
+                        Text(
+                            text = stringResource(R.string.patch_boot_info, info.headerVersion, kindText),
+                            fontSize = 12.sp,
+                            color = if (info.lkmPatchable) colorScheme.primary else colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                         )
                     }
                     AnimatedVisibility(
@@ -488,23 +515,7 @@ internal fun InstallScreenMiuix(
                         }
                     }
                     
-                    TextButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 12.dp),
-                            text = stringResource(id = R.string.install_next),
-                            enabled = uiState.canInstall,
-                            colors = ButtonDefaults.textButtonColorsPrimary(),
-                            onClick = actions.onNext
-                        )
-                    Spacer(
-                        Modifier.height(
-                            WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding() +
-                                    WindowInsets.captionBar.asPaddingValues()
-                                        .calculateBottomPadding()
-                        )
-                    )
+                    Spacer(Modifier.height(24.dp))
                 }
             }
         }

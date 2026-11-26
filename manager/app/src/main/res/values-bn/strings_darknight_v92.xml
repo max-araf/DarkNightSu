@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brand_wordmark">DARKNIGHT</string>
+
+    <string name="flash_diag_title">কেন ব্যর্থ হলো?</string>
+    <string name="flash_diag_header_old">আপনার boot ইমেজ হেডার v%1$d (non-GKI)। LKM প্যাচ শুধু GKI 2.0 ইমেজে (হেডার v3 বা v4) কাজ করে। শুধু 5.10 কার্নেল হলেই ফোন GKI হয় না। আপনার ফোনের জন্য KernelSU বিল্ট-ইন AnyKernel3 কার্নেল ব্যবহার করুন।</string>
+    <string name="flash_diag_wrong_file">এটি boot ইমেজ নয়। boot.img বা init_boot.img বেছে নিন।</string>
+    <string name="flash_diag_archive">এটি একটি আর্কাইভ (zip / tar / lz4)। আগে এর ভেতর থেকে boot.img বা init_boot.img বের করুন।</string>
+    <string name="flash_diag_vendor_boot">vendor_boot.img প্যাচ করা যায় না। boot.img বা init_boot.img বেছে নিন।</string>
+    <string name="flash_diag_too_small">ফাইলটি boot ইমেজ হওয়ার জন্য খুব ছোট।</string>
+    <string name="flash_diag_unknown">অজানা সমস্যা। লগ সেভ করে Issues টপিকে পাঠান।</string>
+
+    <string name="patch_boot_info">Boot ইমেজ: হেডার v%1$d (%2$s)</string>
+    <string name="patch_boot_gki">GKI 2.0 ফরম্যাট</string>
+    <string name="patch_boot_nongki">non-GKI</string>
+    <string name="patch_blocked_title">GKI boot ইমেজ নয়</string>
+    <string name="patch_blocked_body">এই boot ইমেজের হেডার v%1$d (non-GKI)। LKM প্যাচার \"bootimage version %1$d is not supported\" বলে ব্যর্থ হবে। তার বদলে KernelSU বিল্ট-ইন AnyKernel3 কার্নেল ব্যবহার করুন।</string>
+    <string name="patch_blocked_action">AnyKernel3 ব্যবহার করুন</string>
+
+    <string name="theme_dl_failed_detail">থিম ডাউনলোড ব্যর্থ: %1$s</string>
+    <string name="theme_dl_copy_error">এরর কপি</string>
+</resources>

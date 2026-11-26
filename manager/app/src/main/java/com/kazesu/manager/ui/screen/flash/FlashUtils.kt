@@ -224,11 +224,36 @@ fun FlashEffect(
             return@LaunchedEffect
         }
         var currentText = text
+        var bannerEmitted = false
+        var passedBanner = false
         val mainHandler = Handler(Looper.getMainLooper())
         withContext(Dispatchers.IO) {
-            flashIt(flashIt, onStdout = {
-                val tempText = "$it\n"
-                if (tempText.startsWith("[H[J")) { // clear command
+            flashIt(flashIt, onStdout = { rawLine ->
+                logContent.append(rawLine).append("\n")
+                val cleaned = rawLine.trimEnd()
+                val looksLikeAsciiArt = !passedBanner && (
+                    cleaned.contains("___") ||
+                        cleaned.contains("|___") ||
+                        cleaned.contains("\\__") ||
+                        cleaned.contains("__/ ") ||
+                        cleaned.contains("| |") ||
+                        cleaned.contains("/ /") ||
+                        cleaned.contains("\\\\") ||
+                        (cleaned.isNotEmpty() && cleaned.all { ch -> ch in " _|/\\`'-.,=^*~<>()[]{}" })
+                    )
+                if (looksLikeAsciiArt) {
+                    if (!bannerEmitted) {
+                        bannerEmitted = true
+                        currentText += "=== DARKNIGHT ===\n"
+                        mainHandler.post { onTextUpdate(currentText) }
+                    }
+                    return@flashIt
+                }
+                if (cleaned.isNotBlank()) {
+                    passedBanner = true
+                }
+                val tempText = "$rawLine\n"
+                if (tempText.startsWith("\u001B[H\u001B[J")) { // clear command
                     currentText = tempText.substring(6)
                 } else {
                     currentText += tempText
@@ -236,7 +261,6 @@ fun FlashEffect(
                 mainHandler.post {
                     onTextUpdate(currentText)
                 }
-                logContent.append(it).append("\n")
             }, onStderr = {
                 logContent.append(it).append("\n")
             }, guardConfirmed = guardConfirmed).apply {
@@ -407,4 +431,24 @@ fun JailbreakFlashWarningDialog(
             }
         }
     )
+}
+
+sealed class FlashFailureDiag {
+    data class OldHeader(val version: Int) : FlashFailureDiag()
+    data object WrongFile : FlashFailureDiag()
+    data object Unknown : FlashFailureDiag()
+}
+
+private val BOOTIMAGE_VER_RE = Regex("bootimage\s+version\s+(\d+)[^\n]*not\s+supported", RegexOption.IGNORE_CASE)
+
+fun diagnoseFlashFailure(logText: String): FlashFailureDiag {
+    BOOTIMAGE_VER_RE.find(logText)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let { ver ->
+        return FlashFailureDiag.OldHeader(ver)
+    }
+    if (logText.contains("Unpacking boot image", ignoreCase = true) &&
+        logText.contains("Error", ignoreCase = true)
+    ) {
+        return FlashFailureDiag.WrongFile
+    }
+    return FlashFailureDiag.Unknown
 }

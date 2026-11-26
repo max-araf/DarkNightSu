@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 data class ExtensionItem(
     val state: ExtensionState,
     val descriptor: ExtensionDescriptor,
+    val versionLabel: String? = null,
 ) {
     val wireName: String get() = state.wireName
 }
@@ -100,15 +101,21 @@ class ExtensionsViewModel(
 }
 
 private fun toItem(state: ExtensionState): ExtensionItem {
-    val resolved = if (state.wireName == "susfs" && !state.supported &&
-        com.kazesu.manager.ui.util.getSuSFSStatus().equals("true", ignoreCase = true)
-    ) {
-        state.copy(supported = true, value = if (state.value == 0L) 1L else state.value)
+    var versionLabel: String? = null
+    val resolved = if (state.wireName == "susfs") {
+        val detected = com.kazesu.manager.ui.util.SusfsDetector.detect()
+        if (detected.supported) {
+            versionLabel = detected.version.takeIf { it.isNotBlank() }
+            state.copy(supported = true, value = if (state.value == 0L) 1L else state.value)
+        } else {
+            state
+        }
     } else {
         state
     }
     return ExtensionItem(
         state = resolved,
         descriptor = ExtensionCatalog.descriptorFor(resolved.wireName, resolved.id),
+        versionLabel = versionLabel,
     )
 }

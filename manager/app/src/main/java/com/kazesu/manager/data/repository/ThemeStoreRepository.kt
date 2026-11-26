@@ -3,6 +3,7 @@
 package com.kazesu.manager.data.repository
 
 import android.content.Context
+import android.util.Log
 import com.kazesu.manager.data.model.ThemeStoreCatalog
 import com.kazesu.manager.data.model.ThemeStoreEntry
 import com.kazesu.manager.data.model.ThemeStoreHealth
@@ -246,6 +247,8 @@ class ThemeStoreRepository(
     private val downloadClient: OkHttpClient by lazy {
         client.newBuilder()
             .cache(null)
+            .followRedirects(true)
+            .followSslRedirects(true)
             // Parallel chunks need separate connections. Under HTTP/2 OkHttp would
             // multiplex every range onto one TCP stream, which inherits the mirror's
             // per-connection throttle and removes the benefit.
@@ -405,6 +408,8 @@ class ThemeStoreRepository(
             }
 
             val resumeFrom = tempFile.takeIf { it.isFile }?.length() ?: 0L
+            val targetUrl = base + entry.path.removePrefix("/")
+            Log.d("DarkNightTheme", "downloadTheme start id=${entry.id} url=$targetUrl size=${entry.size} resumeFrom=$resumeFrom hasToken=${token.isNotBlank()}")
             val downloaded = downloadThemePackage(
                 entry = entry,
                 url = base + entry.path.removePrefix("/"),
@@ -818,8 +823,17 @@ class ThemeStoreRepository(
             onTransferred(resumeFrom, entry.size)
         }
 
-        downloadClient.newCall(requestBuilder.build()).execute().use { response ->
-            if (response.code == 401) throw ThemeStoreUnauthorizedException()
+        val req = requestBuilder.build()
+        downloadClient.newCall(req).execute().use { response ->
+            Log.d(
+                "DarkNightTheme",
+                "GET $url -> HTTP ${response.code} ua=${req.header("User-Agent")} ct=${response.header("Content-Type")} len=${response.header("Content-Length")} range=${response.header("Content-Range")}"
+            )
+            if (response.code == 401) {
+                val snippet = runCatching { response.body.string().trim().take(200) }.getOrDefault("")
+                Log.d("DarkNightTheme", "HTTP 401 body: $snippet")
+                throw IOException("HTTP 401 (Unauthorized)${if (snippet.isNotBlank()) ": $snippet" else ""}")
+            }
             if (response.code == 416) {
                 tempFile.delete()
                 if (allowRestart) {
@@ -830,7 +844,10 @@ class ThemeStoreRepository(
                 throw IOException("HTTP 416 for ${entry.path}")
             }
             if (!response.isSuccessful) {
-                throw IOException("HTTP ${response.code} for ${entry.path}")
+                val snippet = runCatching { response.body.string().trim().take(200) }.getOrDefault("")
+                Log.d("DarkNightTheme", "HTTP ${response.code} body: $snippet")
+                val reason = if (response.code == 403) "Server refused this app (HTTP 403)" else "HTTP ${response.code}"
+                throw IOException("$reason${if (snippet.isNotBlank()) " — $snippet" else ""}")
             }
 
             val body = response.body

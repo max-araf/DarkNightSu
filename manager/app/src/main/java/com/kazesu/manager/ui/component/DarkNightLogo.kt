@@ -1,6 +1,19 @@
 package com.kazesu.manager.ui.component
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.kazesu.manager.R
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -235,5 +248,35 @@ fun DrawScope.drawDarkNightLogo(c: DarkNightLogoColors, progressMs: Float) {
                 )
             }
         }
+    }
+}
+
+/**
+ * Single-line DARKNIGHT wordmark with 2dp x 28dp rounded accent underline.
+ * Never wraps or overlaps even on 320dp screens or 1.3x font scale.
+ */
+@Composable
+fun DarkNightWordmark(
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.brand_wordmark),
+            maxLines = 1,
+            softWrap = false,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 7.sp,
+            color = glass.content,
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Box(
+            modifier = Modifier
+                .width(28.dp)
+                .height(2.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .background(glass.accent),
+        )
     }
 }

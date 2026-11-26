@@ -21,7 +21,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.kazesu.manager.ui.theme.LocalDarkNightGlass
+import com.kazesu.manager.ui.util.rememberNavBottom
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -119,10 +132,7 @@ fun FlashScreenMaterial(
                             stringResource(if (isRebootAction) state.rebootLabelRes else R.string.close)
                         )
                     },
-                    modifier = Modifier.padding(
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                                WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
-                    )
+                    modifier = Modifier.padding(bottom = rememberNavBottom() + 16.dp)
                 )
             }
         },
@@ -147,7 +157,15 @@ fun FlashScreenMaterial(
             LaunchedEffect(state.text) {
                 scrollState.animateScrollTo(scrollState.maxValue)
             }
+            val navBottom = rememberNavBottom()
             Spacer(Modifier.height(innerPadding.calculateTopPadding()))
+            if (state.flashingStatus == FlashingStatus.FAILED) {
+                FlashFailureDiagnosisCard(
+                    logText = state.text,
+                    onSaveLog = actions.onSaveLog,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
             Surface(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -157,17 +175,66 @@ fun FlashScreenMaterial(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Text(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(16.dp),
                     text = state.text,
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
+                    softWrap = false,
                 )
             }
-            Spacer(
-                Modifier.height(
-                    16.dp + 54.dp + navBars.calculateBottomPadding() + captionBar.calculateBottomPadding()
+            Spacer(Modifier.height(navBottom + 88.dp))
+        }
+    }
+}
+
+@Composable
+internal fun FlashFailureDiagnosisCard(
+    logText: String,
+    onSaveLog: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    val amber = Color(0xFFF59E0B)
+    val message = when (val diag = diagnoseFlashFailure(logText)) {
+        is FlashFailureDiag.OldHeader -> stringResource(R.string.flash_diag_header_old, diag.version)
+        FlashFailureDiag.WrongFile -> stringResource(R.string.flash_diag_wrong_file)
+        FlashFailureDiag.Unknown -> stringResource(R.string.flash_diag_unknown)
+    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(amber.copy(alpha = if (glass.isDark) 0.16f else 0.14f))
+            .border(1.dp, amber.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.flash_diag_title),
+            color = glass.content,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = message,
+            color = glass.content.copy(alpha = 0.90f),
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+        )
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = onSaveLog,
+                border = BorderStroke(1.dp, amber.copy(alpha = 0.65f)),
+            ) {
+                Text(
+                    text = stringResource(R.string.save_log),
+                    color = glass.content,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
-            )
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.colorpalette
+import com.kazesu.manager.ui.util.rememberNavBottom
 import com.kazesu.manager.ui.theme.DarkNightGradientPaletteSection
 
 import com.kazesu.manager.ui.component.miuix.MiuixTextButtonAffectedByBackground
@@ -1970,7 +1971,7 @@ fun ColorPaletteScreenMiuix(
                 item {
                     Spacer(
                         Modifier.height(
-                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            rememberNavBottom() +
                                     WindowInsets.captionBar.asPaddingValues().calculateBottomPadding() +
                                     12.dp
                         )

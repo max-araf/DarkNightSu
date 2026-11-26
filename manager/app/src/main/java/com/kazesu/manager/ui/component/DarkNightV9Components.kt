@@ -64,7 +64,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.kazesu.manager.ui.util.RootExec
 import com.kazesu.manager.R
 import com.kazesu.manager.ui.theme.DarkNightGlassCard
 import com.kazesu.manager.ui.theme.DarkNightThemeStore
@@ -477,13 +481,24 @@ fun RootCompatCheckCard(
     val prefs = remember(context) { context.getSharedPreferences(COMPAT_PREFS, Context.MODE_PRIVATE) }
     var running by remember { mutableStateOf(false) }
     var deepEnabled by remember { mutableStateOf(false) }
+    var effectiveRoot by remember(rootAvailable) { mutableStateOf(rootAvailable) }
     var overridesExpanded by remember { mutableStateOf(false) }
     var ovrBootloader by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_BOOTLOADER, false)) }
     var ovrVendor by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_VENDOR, false)) }
     var manualRunOnRooted by remember { mutableStateOf(false) }
 
     LaunchedEffect(rootAvailable) {
-        if (!rootAvailable) deepEnabled = false
+        val rooted = withContext(Dispatchers.IO) { rootAvailable || RootExec.isRoot() }
+        effectiveRoot = rooted
+        if (!rooted) deepEnabled = false
+    }
+    LifecycleResumeEffect(Unit) {
+        val job = scope.launch {
+            val rooted = withContext(Dispatchers.IO) { rootAvailable || RootExec.isRoot() }
+            effectiveRoot = rooted
+            if (!rooted) deepEnabled = false
+        }
+        onPauseOrDispose { job.cancel() }
     }
 
     DarkNightGlassCard(
@@ -565,13 +580,13 @@ fun RootCompatCheckCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.cmp_deep_toggle),
-                        color = if (rootAvailable) glass.content else glass.contentSecondary,
+                        color = if (effectiveRoot) glass.content else glass.contentSecondary,
                         fontSize = 13.5.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = stringResource(
-                            if (rootAvailable) R.string.cmp_deep_desc else R.string.cmp_deep_no_root
+                            if (effectiveRoot) R.string.cmp_deep_desc else R.string.cmp_deep_no_root
                         ),
                         color = glass.contentSecondary,
                         fontSize = 12.sp,
@@ -881,26 +896,46 @@ fun BootImageExtractorCard(
     val glass = LocalDarkNightGlass.current
     val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
 
+    var effectiveRoot by remember(rootAvailable) { mutableStateOf(rootAvailable) }
     var partitions by remember { mutableStateOf<List<BootImageExtractor.PartitionInfo>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
+    var debugReason by remember { mutableStateOf<String?>(null) }
     val extracting = remember { mutableStateMapOf<String, Boolean>() }
     val results = remember { mutableStateMapOf<String, BootImageExtractor.ExtractResult>() }
 
-    LaunchedEffect(rootAvailable) {
-        if (rootAvailable) {
-            partitions = BootImageExtractor.listPartitions()
+    suspend fun refreshPartitions() {
+        val rooted = withContext(Dispatchers.IO) { RootExec.isRoot() }
+        val combinedRoot = rootAvailable || rooted
+        effectiveRoot = combinedRoot
+        if (combinedRoot) {
+            val found = BootImageExtractor.listPartitions()
+            partitions = found
             loaded = true
+            debugReason = if (found.isEmpty()) {
+                if (rooted) "by-name dir not found" else "root shell failed"
+            } else {
+                null
+            }
         } else {
             partitions = emptyList()
             loaded = false
+            debugReason = null
         }
+    }
+
+    LaunchedEffect(rootAvailable) {
+        refreshPartitions()
+    }
+    LifecycleResumeEffect(Unit) {
+        val job = scope.launch { refreshPartitions() }
+        onPauseOrDispose { job.cancel() }
     }
 
     DarkNightGlassCard(
         palette = themeState.palette,
         modifier = modifier
             .fillMaxWidth()
-            .then(if (!rootAvailable) Modifier.alpha(0.60f) else Modifier),
+            .then(if (!effectiveRoot) Modifier.alpha(0.60f) else Modifier),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -918,7 +953,7 @@ fun BootImageExtractorCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = if (rootAvailable) Icons.Filled.Share else Icons.Filled.Lock,
+                        imageVector = if (effectiveRoot) Icons.Filled.Share else Icons.Filled.Lock,
                         contentDescription = null,
                         tint = glass.accentText,
                         modifier = Modifier.size(20.dp),
@@ -932,14 +967,14 @@ fun BootImageExtractorCard(
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = stringResource(if (rootAvailable) R.string.ext_desc else R.string.ext_need_root),
+                        text = stringResource(if (effectiveRoot) R.string.ext_desc else R.string.ext_need_root),
                         color = glass.contentSecondary,
                         fontSize = 12.5.sp,
                     )
                 }
             }
 
-            if (!rootAvailable) {
+            if (!effectiveRoot) {
                 Text(
                     text = stringResource(R.string.ext_nonroot_tip),
                     color = glass.contentSecondary,
@@ -959,6 +994,14 @@ fun BootImageExtractorCard(
                     color = glass.contentSecondary,
                     fontSize = 13.sp,
                 )
+                debugReason?.let { reason ->
+                    Text(
+                        text = reason,
+                        color = glass.contentSecondary.copy(alpha = 0.78f),
+                        fontSize = 11.5.sp,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
             } else {
                 val shareTitle = stringResource(R.string.ext_share)
                 partitions.forEach { part ->

@@ -510,14 +510,7 @@ fun DarkNightStatusCardMaterial(
                                     .background(a),
                             )
                         }
-                        if (!compact) {
-                            Text(
-                                text = "DarkNightSu",
-                                color = glass.content,
-                                fontSize = 12.5.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
+
                     }
 
                     // Main 2-line title

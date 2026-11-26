@@ -2,6 +2,7 @@ package com.kazesu.manager.ui.screen.install
 
 import androidx.compose.runtime.Immutable
 import com.kazesu.manager.ui.kernelFlash.KpmPatchOption
+import com.kazesu.manager.ui.util.BootImageInspector
 import com.kazesu.manager.ui.util.LkmSelection
 
 @Immutable
@@ -33,6 +34,7 @@ internal data class InstallUiState(
     val spoofEnabled: Boolean = false,
     val spoofRelease: String,
     val spoofVersion: String,
+    val pickedBootInfo: BootImageInspector.Info? = null,
 ) {
     val kpmEnabled: Boolean get() = kpmPatchOption.enabled
     val canInstall: Boolean

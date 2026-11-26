@@ -44,6 +44,7 @@ import com.kazesu.manager.ui.theme.LocalBackgroundImagePath
 import com.kazesu.manager.ui.theme.LocalEnableBlur
 import com.kazesu.manager.ui.util.BlurredBar
 import com.kazesu.manager.ui.util.rememberBlurBackdrop
+import com.kazesu.manager.ui.util.rememberNavBottom
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -99,8 +100,7 @@ fun FlashScreenMiuix(
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(
-                            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                                    WindowInsets.captionBar.asPaddingValues().calculateBottomPadding() + 20.dp,
+                            bottom = rememberNavBottom() + 20.dp,
                             end = 20.dp
                         )
                         .border(0.05.dp, colorScheme.outline.copy(alpha = 0.5f), CircleShape),
@@ -147,14 +147,17 @@ fun FlashScreenMiuix(
                 LaunchedEffect(state.text) {
                     scrollState.animateScrollTo(scrollState.maxValue)
                 }
+                val navBottom = rememberNavBottom()
                 Spacer(Modifier.height(innerPadding.calculateTopPadding()))
-                LogConsole(text = state.text)
-                Spacer(
-                    Modifier.height(
-                        12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                                WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                if (state.flashingStatus == FlashingStatus.FAILED) {
+                    FlashFailureDiagnosisCard(
+                        logText = state.text,
+                        onSaveLog = actions.onSaveLog,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     )
-                )
+                }
+                LogConsole(text = state.text)
+                Spacer(Modifier.height(navBottom + 88.dp))
             }
         }
     }

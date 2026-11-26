@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.extensions
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -172,9 +173,7 @@ fun ExtensionsScreenMiuix(
             item(key = "bottom-inset") {
                 Spacer(
                     Modifier.height(
-                        WindowInsets.navigationBars
-                            .asPaddingValues()
-                            .calculateBottomPadding() + 4.dp,
+                        rememberNavBottom() + 4.dp,
                     ),
                 )
             }

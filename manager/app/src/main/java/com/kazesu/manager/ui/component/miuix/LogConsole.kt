@@ -1,7 +1,9 @@
 package com.kazesu.manager.ui.component.miuix
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -22,10 +24,13 @@ fun LogConsole(
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Text(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(16.dp),
             text = text,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
+            softWrap = false,
             color = colorScheme.onSurfaceContainer,
         )
     }

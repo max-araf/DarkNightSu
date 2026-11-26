@@ -134,6 +134,7 @@ import com.kazesu.manager.ui.component.miuix.SendLogDialog
 import com.kazesu.manager.ui.util.DarkNightAccess
 import com.kazesu.manager.ui.util.rememberDarkNightToolsUnlocked
 import com.kazesu.manager.ui.component.DarkNightPillDock
+import com.kazesu.manager.ui.util.rememberNavBottom
 import com.kazesu.manager.ui.component.DarkNightSideInfoBarOverlay
 import com.kazesu.manager.ui.screen.darknight.DarkNightSideInfoBarSettingsScreen
 import com.kazesu.manager.ui.theme.LocalDarkNightGlass
@@ -1006,8 +1007,8 @@ fun MainScreen(
             }
         } else {
             // PART 2: Floating Pill Dock (Glass Dark / Dark Solid / auto Light Glass) + T7 140ms Crossfade
-            val navBarBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-            val dockClearance = navBarBottomPadding + 92.dp
+            val navBarBottomPadding = rememberNavBottom()
+            val dockClearance = navBarBottomPadding + 104.dp
             val sideBarEndPad = LocalSideInfoBarPadding.current
             val glass = LocalDarkNightGlass.current
             val dockBackdrop = rememberLayerBackdrop {

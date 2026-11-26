@@ -1,4 +1,5 @@
 package com.kazesu.manager.ui.screen.themestore
+import com.kazesu.manager.ui.util.rememberNavBottom
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -120,6 +121,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kazesu.manager.R
+import com.kazesu.manager.ui.component.GlassDialog
+import com.kazesu.manager.ui.util.DarkNightShare
 import com.kazesu.manager.data.repository.ThemeStoreRepository
 import com.kazesu.manager.data.repository.ThemeStorePreviewLoader
 import com.kazesu.manager.ui.component.material.ExpressiveScaffold
@@ -443,11 +446,21 @@ fun ThemeStoreScreen(
         }
     }
 
-    LaunchedEffect(state.downloadFailed) {
-        if (state.downloadFailed) {
-            Toast.makeText(context, R.string.theme_store_download_failed, Toast.LENGTH_SHORT).show()
-            viewModel.clearDownloadError()
-        }
+    if (state.downloadFailed) {
+        val detail = state.downloadErrorDetail?.takeIf { it.isNotBlank() } ?: "Unknown error"
+        GlassDialog(
+            title = stringResource(R.string.theme_store_download_failed),
+            message = stringResource(R.string.theme_dl_failed_detail, detail),
+            primaryLabel = stringResource(R.string.theme_dl_copy_error),
+            onPrimary = {
+                DarkNightShare.copyText(context, "DarkNightTheme error", detail)
+                Toast.makeText(context, R.string.theme_dl_copy_error, Toast.LENGTH_SHORT).show()
+                viewModel.clearDownloadError()
+            },
+            secondaryLabel = stringResource(R.string.close),
+            onSecondary = { viewModel.clearDownloadError() },
+            onDismiss = { viewModel.clearDownloadError() },
+        )
     }
 
     ThemeImportDialog(
@@ -1619,7 +1632,7 @@ private fun ThemeStoreMaterial(
                     item(key = "bottom-inset", span = { GridItemSpan(maxLineSpan) }) {
                         Spacer(
                             Modifier.height(
-                                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp,
+                                rememberNavBottom() + 88.dp,
                             ),
                         )
                     }

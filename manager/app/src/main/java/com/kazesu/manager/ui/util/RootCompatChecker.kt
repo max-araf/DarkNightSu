@@ -1,7 +1,6 @@
 package com.kazesu.manager.ui.util
 
 import android.os.Build
-import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -99,9 +98,6 @@ object RootCompatChecker {
         ""
     }
 
-    private fun rootCmd(cmd: String): Shell.Result =
-        getRootShell().newJob().add(cmd).to(ArrayList(), ArrayList()).exec()
-
     private fun isCustomRom(): Boolean {
         val customProps = listOf(
             "ro.lineage.version", "ro.modversion", "ro.crdroid.version",
@@ -119,29 +115,42 @@ object RootCompatChecker {
             items.add(CompatItem(key, sev, title, detail))
         }
 
-        val rootOk = deep && rootCmd("id -u").let { it.isSuccess && it.out.firstOrNull()?.trim() == "0" }
+        val rootOk = deep && RootExec.isRoot()
         val manufacturer = (Build.MANUFACTURER ?: "").lowercase()
         val brand = (Build.BRAND ?: "").lowercase()
         val customRom = isCustomRom()
         val deviceName = "${Build.MANUFACTURER} ${Build.MODEL}".trim()
 
         // ---- Android / ABI ----
-        val abi = Build.SUPPORTED_ABIS.firstOrNull().orEmpty()
+        // Kernel root needs a 64-bit ARM KERNEL. The app itself may be 32-bit (armv7 build) on a 64-bit kernel
+        // (very common on cheap phones), so we look at the kernel, not only at the app ABI.
+        val abis = Build.SUPPORTED_ABIS.toList()
+        val primary = abis.firstOrNull().orEmpty()
+        val osArch = (System.getProperty("os.arch") ?: "").lowercase()
+        val unameM = try {
+            ProcessBuilder("uname", "-m").redirectErrorStream(true).start().inputStream.bufferedReader().use { it.readText() }.trim().lowercase()
+        } catch (_: Throwable) { "" }
+        val arm64Kernel = Build.SUPPORTED_64_BIT_ABIS.any { it.startsWith("arm64") } ||
+            osArch in setOf("aarch64", "armv8l", "arm64") || unameM in setOf("aarch64", "armv8l", "arm64")
         if (Build.VERSION.SDK_INT < 26) {
             add("sdk", CompatSeverity.BLOCK, "Android too old", "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT}). Android 8.0+ is required.")
         } else {
             add("sdk", CompatSeverity.OK, "Android ${Build.VERSION.RELEASE}", "SDK ${Build.VERSION.SDK_INT}")
         }
-        val supportedAbis = Build.SUPPORTED_ABIS.joinToString(", ")
         when {
-            Build.SUPPORTED_ABIS.contains("arm64-v8a") ->
-                add("abi", CompatSeverity.OK, "64-bit ARM (arm64-v8a)", "Full support: GKI LKM, KPM & AnyKernel3 ($supportedAbis)")
-            Build.SUPPORTED_ABIS.contains("armeabi-v7a") ->
-                add("abi", CompatSeverity.OK, "32-bit ARM (armeabi-v7a)", "Supported via AnyKernel3 / built-in kernel ($supportedAbis). LKM & KPM patching require arm64-v8a.")
-            abi.isNotEmpty() ->
-                add("abi", CompatSeverity.INFO, "Architecture: $abi", "ABIs: $supportedAbis. Verify a matching kernel build for this ABI.")
-            else ->
-                add("abi", CompatSeverity.WARN, "Unknown ABI", "Could not detect device CPU architecture.")
+            primary.startsWith("arm64") ->
+                add("abi", CompatSeverity.OK, "arm64 device", "ABI $primary")
+            primary.startsWith("armeabi") && arm64Kernel ->
+                add("abi", CompatSeverity.INFO, "32-bit app on a 64-bit ARM kernel",
+                    "ABI $primary, kernel arch ${osArch.ifEmpty { unameM }}. Kernel root works on 64-bit kernels. Use the armv7 / universal manager build.")
+            primary.startsWith("armeabi") ->
+                add("abi", CompatSeverity.BLOCK, "32-bit ARM kernel",
+                    "ABI $primary, kernel arch ${osArch.ifEmpty { unameM }}. Kernel root needs a 64-bit (arm64) kernel.")
+            primary.startsWith("x86_64") || primary.startsWith("x86") ->
+                add("abi", CompatSeverity.INFO, "x86 device", "ABI $primary. Only for emulators / x86 devices with a KernelSU-enabled kernel.")
+            primary.startsWith("riscv64") ->
+                add("abi", CompatSeverity.INFO, "RISC-V device", "ABI $primary. Experimental.")
+            else -> add("abi", CompatSeverity.WARN, "Unknown CPU ABI", "ABI '$primary', kernel arch ${osArch.ifEmpty { unameM }}.")
         }
 
         // ---- Kernel ----
@@ -151,7 +160,18 @@ object RootCompatChecker {
         val kv = KVER_RE.find(release)
         val major = kv?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val minor = kv?.groupValues?.get(2)?.toIntOrNull() ?: 0
-        val isGki = overrides.gki ?: (gki != null)
+        // Header version of the real boot partition beats the uname string (deep mode only).
+        var bootHdr: Int? = null
+        var bootDev: String? = null
+        if (rootOk) {
+            val parts = BootImageExtractor.listPartitions()
+            val bp = parts.firstOrNull { it.name == "boot" || it.name.startsWith("boot_") }
+            if (bp != null) {
+                bootDev = bp.devicePath
+                bootHdr = BootImageInspector.headerVersionViaRoot(bp.devicePath)
+            }
+        }
+        val isGki = overrides.gki ?: (bootHdr?.let { it >= 3 } ?: (gki != null))
         val rootPath: RootPath = if (isGki) RootPath.LKM_GKI else RootPath.KERNEL_BUILTIN
         if (major < 4 || (major == 4 && minor < 4)) {
             add("kernel", CompatSeverity.WARN, "Kernel version looks too old", "Linux $release. Linux 4.4+ is required (this value can be spoofed).")
@@ -164,10 +184,19 @@ object RootCompatChecker {
                 "Linux $release. LKM mode is not available. Root needs an AnyKernel3 kernel built with KernelSU for your exact device.$old")
         }
 
+        if (bootHdr != null) {
+            if (bootHdr >= 3) {
+                add("boot_header", CompatSeverity.OK, "Boot image header v$bootHdr (GKI 2.0 format)", "LKM patching works with this boot layout.")
+            } else {
+                add("boot_header", CompatSeverity.WARN, "Boot image header v$bootHdr (NOT GKI 2.0)",
+                    "Kernel ${major}.${minor} does not mean GKI. Header v$bootHdr cannot be LKM-patched (\"bootimage version $bootHdr is not supported\"). Use an AnyKernel3 kernel built with KernelSU.")
+            }
+        }
+
         // ---- Bootloader ----
         // Props can be faked by integrity modules (resetprop). /proc/cmdline comes from the real bootloader,
         // so it wins when the two disagree. A locked reading is a RISK, never a BLOCK.
-        val cmdline = if (rootOk) rootCmd("cat /proc/cmdline").out.joinToString(" ") else readFile("/proc/cmdline")
+        val cmdline = if (rootOk) RootExec.lines("cat /proc/cmdline").joinToString(" ") else readFile("/proc/cmdline")
         fun cmd(key: String): String = Regex("androidboot\\.$key=(\\S+)").find(cmdline)?.groupValues?.get(1).orEmpty()
         fun propBoot(key: String): String = prop("ro.boot.$key")
         fun lockedFrom(flash: String, vb: String, dev: String): Boolean? = when {
@@ -225,24 +254,11 @@ object RootCompatChecker {
                     add("vendor", CompatSeverity.INFO, "Transsion device on custom ROM", "Custom ROM kernels are usually fine.")
                 }
             }
-            manufacturer == "huawei" ->
-                add("vendor", CompatSeverity.RISK, "Huawei", "Huawei does not provide an official bootloader unlock.")
-            manufacturer == "honor" || brand == "honor" ->
-                add("vendor", CompatSeverity.WARN, "Honor", "Bootloader unlock is restricted on most Honor devices.")
-            manufacturer == "vivo" || brand == "iqoo" ->
-                add("vendor", CompatSeverity.WARN, "vivo / iQOO", "Bootloader unlock is limited and region dependent.")
+            manufacturer == "huawei" -> add("vendor", CompatSeverity.RISK, "Huawei", "Huawei does not provide an official bootloader unlock.")
+            manufacturer == "honor" || brand == "honor" -> add("vendor", CompatSeverity.WARN, "Honor", "Bootloader unlock is restricted on most Honor devices.")
+            manufacturer == "vivo" || brand == "iqoo" -> add("vendor", CompatSeverity.WARN, "vivo / iQOO", "Bootloader unlock is limited and region dependent.")
             manufacturer == "xiaomi" || brand == "redmi" || brand == "poco" ->
-                add("vendor", CompatSeverity.INFO, "Xiaomi / Redmi / POCO", "Unlock via Mi Unlock tool. HyperOS may enforce account wait/quota; check Anti-Rollback (ARB) before flashing.")
-            manufacturer == "oneplus" || brand == "oneplus" ->
-                add("vendor", CompatSeverity.OK, "OnePlus", "Friendly fastboot OEM unlock (except some carrier-locked models). Keep stock boot/init_boot backup.")
-            manufacturer == "realme" || brand == "realme" || manufacturer == "oppo" || brand == "oppo" ->
-                add("vendor", CompatSeverity.WARN, "Realme / OPPO", "Requires official Deep Testing app or region-specific unlock support. Check AVB/vbmeta before flashing.")
-            manufacturer == "nubia" || brand == "nubia" || manufacturer == "zte" || brand == "redmagic" || manufacturer == "redmagic" ->
-                add("vendor", CompatSeverity.WARN, "RedMagic / Nubia / ZTE", "Bootloader unlock varies by model/region (some require EDL or unlock package). Always back up stock boot/init_boot.")
-            manufacturer == "google" || brand == "google" || manufacturer == "nothing" || brand == "nothing" ->
-                add("vendor", CompatSeverity.OK, "${Build.MANUFACTURER} (official unlock)", "Standard fastboot flashing unlock supported. Very friendly for GKI LKM & AnyKernel3.")
-            manufacturer == "motorola" || brand == "motorola" || manufacturer == "sony" || brand == "sony" ->
-                add("vendor", CompatSeverity.INFO, Build.MANUFACTURER, "Official bootloader unlock code available on vendor portal. Keep a stock boot/init_boot backup.")
+                add("vendor", CompatSeverity.INFO, "Xiaomi / Redmi / POCO", "Needs an approved Mi Unlock. HyperOS may restrict unlock per account.")
         }
 
         // ---- Chipset / partitions (info) ----
@@ -270,12 +286,11 @@ object RootCompatChecker {
             if (!rootOk) {
                 add("deep", CompatSeverity.WARN, "Root access not granted", "Deep check needs root from your current root manager. Allow it and run again.")
             } else {
-                provider = rootCmd("su -v").out.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
-                    ?: if (DarkNightAccess.toolsUnlocked()) "DarkNightSu (KernelSU)" else null
+                provider = RootExec.lines("su -v").firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
                 if (provider != null) add("provider", CompatSeverity.INFO, "Current root provider", provider)
 
                 var protFound = false
-                val cfg = rootCmd("zcat /proc/config.gz 2>/dev/null").out
+                val cfg = RootExec.lines("zcat /proc/config.gz 2>/dev/null")
                 if (cfg.isEmpty()) {
                     add("config", CompatSeverity.INFO, "Kernel config not exposed", "/proc/config.gz is missing, so config checks were skipped.")
                 } else {
@@ -298,7 +313,7 @@ object RootCompatChecker {
                     }
                     if (prot.isEmpty()) deepClean = true
                 }
-                val dm = rootCmd("dmesg 2>/dev/null | grep -i -m3 -E 'rkp|defex|kdp'").out
+                val dm = RootExec.lines("dmesg 2>/dev/null | grep -i -m3 -E 'rkp|defex|kdp'")
                 if (dm.isNotEmpty() && !protFound) {
                     deepClean = false
                     add("dmesg_rkp", CompatSeverity.WARN, "RKP / DEFEX / KDP seen in kernel log", dm.first().take(120))
@@ -336,17 +351,11 @@ object RootCompatChecker {
 
 /** Tiny helper so the checker does not depend on the extractor's coroutine API. */
 internal object BootImageExtractorProbe {
-    private fun sh(cmd: String): Shell.Result =
-        getRootShell().newJob().add(cmd).to(ArrayList(), ArrayList()).exec()
-
     fun countTargets(): Int {
         val dirs = listOf("/dev/block/by-name", "/dev/block/bootdevice/by-name")
-        val dir = dirs.firstOrNull { sh("[ -d '$it' ]").isSuccess }
-            ?: sh("ls -d /dev/block/platform/*/by-name /dev/block/platform/*/*/by-name 2>/dev/null | head -n 1")
-                .out.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
-            ?: return 0
+        val dir = dirs.firstOrNull { RootExec.ok("[ -d '$it' ]") } ?: return 0
         return listOf("boot", "init_boot", "vendor_boot", "recovery").count { n ->
-            sh("[ -e '$dir/$n' ] || [ -e '$dir/${n}_a' ] || [ -e '$dir/${n}_b' ]").isSuccess
+            RootExec.ok("[ -e '$dir/$n' ] || [ -e '$dir/${n}_a' ] || [ -e '$dir/${n}_b' ]")
         }
     }
 }

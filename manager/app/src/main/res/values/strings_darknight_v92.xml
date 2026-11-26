@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brand_wordmark">DARKNIGHT</string>
+
+    <string name="flash_diag_title">Why did it fail?</string>
+    <string name="flash_diag_header_old">Your boot image is header v%1$d (non-GKI). LKM patching only works on GKI 2.0 images (header v3 or v4). A 5.10 kernel alone does not make a phone GKI. Use an AnyKernel3 kernel built with KernelSU for your device.</string>
+    <string name="flash_diag_wrong_file">This file is not a boot image. Pick boot.img or init_boot.img.</string>
+    <string name="flash_diag_archive">This looks like an archive (zip / tar / lz4). Extract boot.img or init_boot.img from it first.</string>
+    <string name="flash_diag_vendor_boot">vendor_boot.img cannot be patched. Pick boot.img or init_boot.img.</string>
+    <string name="flash_diag_too_small">The file is too small to be a boot image.</string>
+    <string name="flash_diag_unknown">Unknown error. Save the log and send it to the Issues topic.</string>
+
+    <string name="patch_boot_info">Boot image: header v%1$d (%2$s)</string>
+    <string name="patch_boot_gki">GKI 2.0 format</string>
+    <string name="patch_boot_nongki">non-GKI</string>
+    <string name="patch_blocked_title">Not a GKI boot image</string>
+    <string name="patch_blocked_body">This boot image uses header v%1$d (non-GKI). The LKM patcher would fail with \"bootimage version %1$d is not supported\". Use an AnyKernel3 kernel built with KernelSU instead.</string>
+    <string name="patch_blocked_action">Use AnyKernel3</string>
+
+    <string name="theme_dl_failed_detail">Theme download failed: %1$s</string>
+    <string name="theme_dl_copy_error">Copy error</string>
+</resources>

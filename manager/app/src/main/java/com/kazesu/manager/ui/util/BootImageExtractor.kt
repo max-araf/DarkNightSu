@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -36,18 +35,24 @@ object BootImageExtractor {
         val error: String?,
     )
 
-    private fun sh(cmd: String): Shell.Result =
-        getRootShell().newJob().add(cmd).to(ArrayList(), ArrayList()).exec()
+    /** Result of one root command. [ok] = exit code 0, [out] = stdout lines. */
+    private class Res(val ok: Boolean, val out: List<String>)
+
+    private fun sh(cmd: String): Res {
+        val r = RootExec.exec(cmd) ?: return Res(false, listOf("root not available"))
+        return Res(r.isSuccess, r.out)
+    }
 
     private fun byNameDir(): String? {
         listOf("/dev/block/by-name", "/dev/block/bootdevice/by-name").forEach {
-            if (sh("[ -d '$it' ]").isSuccess) return it
+            if (sh("[ -d '$it' ]").ok) return it
         }
         return sh("ls -d /dev/block/platform/*/by-name /dev/block/platform/*/*/by-name 2>/dev/null | head -n 1")
             .out.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
     }
 
     suspend fun listPartitions(): List<PartitionInfo> = withContext(Dispatchers.IO) {
+        if (!RootExec.isRoot()) return@withContext emptyList()
         val dir = byNameDir() ?: return@withContext emptyList()
         val slot = sh("getprop ro.boot.slot_suffix").out.firstOrNull()?.trim().orEmpty()
         val result = ArrayList<PartitionInfo>()
@@ -55,7 +60,7 @@ object BootImageExtractor {
             val candidates = if (slot.isNotEmpty()) listOf(name + slot, name) else listOf(name)
             for (c in candidates) {
                 val path = "$dir/$c"
-                if (sh("[ -e '$path' ]").isSuccess) {
+                if (sh("[ -e '$path' ]").ok) {
                     val size = sh("blockdev --getsize64 '$path' 2>/dev/null").out
                         .firstOrNull()?.trim()?.toLongOrNull() ?: 0L
                     result.add(PartitionInfo(c, path, size))
@@ -80,7 +85,7 @@ object BootImageExtractor {
                 val dest = "/sdcard/Download/DarkNightSu"
                 sh("mkdir -p '$dest'")
                 val r = sh("dd if='${p.devicePath}' of='$dest/$fileName' bs=1048576 2>&1")
-                val ok = r.isSuccess && sh("[ -s '$dest/$fileName' ]").isSuccess
+                val ok = r.ok && sh("[ -s '$dest/$fileName' ]").ok
                 return@withContext if (ok) {
                     ExtractResult(true, p.name, "Download/DarkNightSu/$fileName", null, p.sizeBytes, null, null, null)
                 } else {

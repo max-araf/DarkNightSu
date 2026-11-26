@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kazesu.manager.ui.theme.DarkNightThemeStore
 import com.kazesu.manager.ui.theme.LocalDarkNightGlass
+import com.kazesu.manager.ui.util.rememberNavBottom
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
@@ -120,11 +121,11 @@ fun DarkNightPillDock(
         backdrop != null &&
         isRenderEffectSupported()
 
+    val navBottom = rememberNavBottom()
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(bottom = 12.dp),
+            .padding(bottom = navBottom + 12.dp),
         contentAlignment = Alignment.BottomCenter,
     ) {
         // Optional outer halo ring (6dp outside, 1dp lite @ 0.26)
