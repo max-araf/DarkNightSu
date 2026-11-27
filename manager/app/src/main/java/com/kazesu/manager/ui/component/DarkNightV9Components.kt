@@ -3,6 +3,23 @@ package com.kazesu.manager.ui.component
 import android.content.Context
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.kazesu.manager.ui.util.RootExec
+import com.kazesu.manager.ui.theme.DarkNightPalette
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.shadow
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -530,6 +547,7 @@ fun RootCompatCheckCard(
     var ovrBootloader by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_BOOTLOADER, false)) }
     var ovrVendor by remember { mutableStateOf(prefs.getBoolean(KEY_OVR_VENDOR, false)) }
     var manualRunOnRooted by remember { mutableStateOf(false) }
+    var detailsExpanded by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(rootAvailable) {
         if (!rootAvailable) deepEnabled = false
@@ -722,6 +740,7 @@ fun RootCompatCheckCard(
                         scope.launch {
                             running = true
                             manualRunOnRooted = true
+                            detailsExpanded = false
                             try {
                                 RootCompatChecker.run(
                                     deep = deepEnabled && rootAvailable,
@@ -815,9 +834,90 @@ fun RootCompatCheckCard(
                             fontWeight = FontWeight.SemiBold,
                         )
 
-                        // Items sorted by severity descending
-                        sortedItems.forEach { item ->
-                            CompatItemRow(item = item)
+                        // Dangerous (BLOCK / RISK) items stay visible even when details are collapsed (max 3)
+                        val warnCount = remember(sortedItems) {
+                            sortedItems.count {
+                                it.severity == CompatSeverity.WARN ||
+                                    it.severity == CompatSeverity.RISK ||
+                                    it.severity == CompatSeverity.BLOCK
+                            }
+                        }
+                        val okCount = remember(sortedItems) {
+                            sortedItems.count {
+                                it.severity == CompatSeverity.OK || it.severity == CompatSeverity.INFO
+                            }
+                        }
+                        val dangerousPreview = remember(sortedItems) {
+                            sortedItems.filter {
+                                it.severity == CompatSeverity.BLOCK || it.severity == CompatSeverity.RISK
+                            }.take(3)
+                        }
+                        if (!detailsExpanded && dangerousPreview.isNotEmpty()) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                dangerousPreview.forEach { item ->
+                                    CompatItemRow(item = item)
+                                }
+                            }
+                        }
+
+                        // Collapsible details header
+                        val detailsChevronRotation by animateFloatAsState(
+                            targetValue = if (detailsExpanded) 180f else 0f,
+                            label = "cmpDetailsChevron",
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(glass.surfaceHi.copy(alpha = 0.50f))
+                                .border(1.dp, glass.outline.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
+                                .clickable { detailsExpanded = !detailsExpanded }
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cmp_summary_line, warnCount, okCount),
+                                color = glass.content,
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        if (detailsExpanded) R.string.cmp_details_hide else R.string.cmp_details_show
+                                    ),
+                                    color = glass.accentText,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Icon(
+                                    imageVector = Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = null,
+                                    tint = glass.accentText,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .graphicsLayer { rotationZ = detailsChevronRotation },
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = detailsExpanded,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut(),
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                sortedItems.forEach { item ->
+                                    CompatItemRow(item = item)
+                                }
+                            }
                         }
 
                         // Disclaimer
@@ -924,6 +1024,7 @@ fun BootImageExtractorCard(
     rootAvailable: Boolean,
     onShowMessage: (String) -> Unit,
     modifier: Modifier = Modifier,
+    embedded: Boolean = false,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -932,11 +1033,14 @@ fun BootImageExtractorCard(
 
     var partitions by remember { mutableStateOf<List<BootImageExtractor.PartitionInfo>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
+    var rootShellAvailable by remember { mutableStateOf(rootAvailable) }
     val extracting = remember { mutableStateMapOf<String, Boolean>() }
     val results = remember { mutableStateMapOf<String, BootImageExtractor.ExtractResult>() }
 
     LaunchedEffect(rootAvailable) {
-        if (rootAvailable) {
+        val hasShell = withContext(Dispatchers.IO) { RootExec.isRoot() }
+        rootShellAvailable = hasShell || rootAvailable
+        if (rootShellAvailable) {
             partitions = BootImageExtractor.listPartitions()
             loaded = true
         } else {
@@ -945,12 +1049,8 @@ fun BootImageExtractorCard(
         }
     }
 
-    DarkNightGlassCard(
-        palette = themeState.palette,
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if (!rootAvailable) Modifier.alpha(0.60f) else Modifier),
-    ) {
+    val effectiveRoot = rootAvailable || rootShellAvailable
+    val cardContent: @Composable ColumnScope.() -> Unit = {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -988,7 +1088,7 @@ fun BootImageExtractorCard(
                 }
             }
 
-            if (!rootAvailable) {
+            if (!effectiveRoot) {
                 Text(
                     text = stringResource(R.string.ext_nonroot_tip),
                     color = glass.contentSecondary,
@@ -1007,6 +1107,12 @@ fun BootImageExtractorCard(
                     text = stringResource(R.string.ext_no_partitions),
                     color = glass.contentSecondary,
                     fontSize = 13.sp,
+                )
+                Text(
+                    text = if (!rootShellAvailable) "Root shell not available" else "by-name directory not found",
+                    color = glass.contentSecondary.copy(alpha = 0.72f),
+                    fontSize = 11.5.sp,
+                    fontFamily = FontFamily.Monospace,
                 )
             } else {
                 val shareTitle = stringResource(R.string.ext_share)
@@ -1034,13 +1140,15 @@ fun BootImageExtractorCard(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace,
                                 )
-                                if (part.sizeBytes > 0L) {
-                                    Text(
-                                        text = Formatter.formatShortFileSize(context, part.sizeBytes),
-                                        color = glass.contentSecondary,
-                                        fontSize = 12.sp,
-                                    )
-                                }
+                                Text(
+                                    text = if (part.sizeBytes > 0L) {
+                                        Formatter.formatShortFileSize(context, part.sizeBytes)
+                                    } else {
+                                        stringResource(R.string.install_extract_sizes_unknown)
+                                    },
+                                    color = glass.contentSecondary,
+                                    fontSize = 12.sp,
+                                )
                             }
                             Button(
                                 onClick = {
@@ -1135,6 +1243,434 @@ fun BootImageExtractorCard(
                     }
                 }
             }
+        }
+    }
+
+    if (embedded) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .then(if (!effectiveRoot) Modifier.alpha(0.60f) else Modifier),
+            content = cardContent,
+        )
+    } else {
+        DarkNightGlassCard(
+            palette = themeState.palette,
+            modifier = modifier
+                .fillMaxWidth()
+                .then(if (!effectiveRoot) Modifier.alpha(0.60f) else Modifier),
+            content = cardContent,
+        )
+    }
+}
+
+// =========================================================================
+// v9.3 Frosted-Glass Install Components (Material + Miuix shared)
+// =========================================================================
+
+@Composable
+fun InstallSectionHeader(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    Text(
+        text = text.uppercase(),
+        color = glass.contentSecondary,
+        fontSize = 11.5.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.sp,
+        modifier = modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+    )
+}
+
+@Composable
+fun InstallQuickStartCard(
+    report: CompatReport?,
+    recommendedLabel: String?,
+    onStart: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
+    val palette = themeState.palette
+
+    if (report == null || recommendedLabel.isNullOrBlank()) {
+        DarkNightGlassCard(
+            palette = palette,
+            modifier = modifier.fillMaxWidth(),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = null,
+                    tint = glass.accentText,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = stringResource(R.string.install_quick_need_check),
+                    color = glass.contentSecondary,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                )
+            }
+        }
+    } else {
+        val shape = RoundedCornerShape(22.dp)
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            palette.primaryGlow.copy(alpha = if (glass.isDark) 0.24f else 0.16f),
+                            palette.secondaryGlow.copy(alpha = if (glass.isDark) 0.10f else 0.08f),
+                        )
+                    )
+                )
+                .border(1.5.dp, palette.primaryGlow.copy(alpha = 0.65f), shape)
+                .padding(16.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = palette.primaryGlow,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.install_quick_title),
+                        color = glass.content,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.install_quick_desc, recommendedLabel),
+                    color = glass.contentSecondary,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(palette.buttonStart, palette.buttonEnd)
+                            )
+                        )
+                        .clickable(onClick = onStart)
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.install_quick_start),
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DarkNightInstallMethodCard(
+    title: String,
+    summary: String?,
+    selected: Boolean,
+    recommended: Boolean,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
+    val palette = themeState.palette
+    val shape = RoundedCornerShape(20.dp)
+
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) {
+            palette.primaryGlow.copy(alpha = 0.72f)
+        } else {
+            Color.White.copy(alpha = if (glass.isDark) 0.20f else 0.35f)
+        },
+        label = "installMethodBorder",
+    )
+
+    val fillBrush = if (selected) {
+        Brush.linearGradient(
+            listOf(
+                palette.primaryGlow.copy(alpha = if (glass.isDark) 0.22f else 0.16f),
+                palette.primaryGlow.copy(alpha = if (glass.isDark) 0.08f else 0.06f),
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                palette.primaryGlow.copy(alpha = if (glass.isDark) 0.12f else 0.08f),
+                glass.surface.copy(alpha = if (glass.isDark) 0.55f else 0.72f),
+            )
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (selected) Modifier.shadow(
+                    elevation = 10.dp,
+                    shape = shape,
+                    ambientColor = palette.primaryGlow.copy(alpha = 0.45f),
+                    spotColor = palette.primaryGlow.copy(alpha = 0.45f),
+                ) else Modifier
+            )
+            .clip(shape)
+            .background(fillBrush)
+            .border(width = if (selected) 1.5.dp else 1.dp, color = borderColor, shape = shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // Palette-colored radio indicator
+            Box(
+                modifier = Modifier
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = if (selected) palette.primaryGlow else glass.contentSecondary.copy(alpha = 0.6f),
+                        shape = CircleShape,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (selected) {
+                    Box(
+                        modifier = Modifier
+                            .size(11.dp)
+                            .clip(CircleShape)
+                            .background(palette.primaryGlow)
+                    )
+                }
+            }
+
+            // Leading icon tile
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(palette.primaryGlow.copy(alpha = if (selected) 0.24f else 0.14f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (selected) palette.primaryGlow else glass.accentText,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = title,
+                        color = glass.content,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (recommended) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(palette.primaryGlow.copy(alpha = 0.22f))
+                                .border(1.dp, palette.primaryGlow.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 7.dp, vertical = 2.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.install_recommended),
+                                color = if (glass.isDark) palette.secondaryGlow else palette.primaryGlow,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
+                if (!summary.isNullOrBlank()) {
+                    Text(
+                        text = summary,
+                        color = glass.contentSecondary,
+                        fontSize = 12.5.sp,
+                        lineHeight = 16.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InstallCollapsibleGlassCard(
+    title: String,
+    icon: ImageVector,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val glass = LocalDarkNightGlass.current
+    val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
+    val chevronRot by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "installCollapseChevron",
+    )
+
+    DarkNightGlassCard(
+        palette = themeState.palette,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggle)
+                    .padding(vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(themeState.palette.primaryGlow.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = glass.accentText,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        color = glass.content,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    if (!subtitle.isNullOrBlank()) {
+                        Text(
+                            text = subtitle,
+                            color = glass.contentSecondary,
+                            fontSize = 12.sp,
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = glass.contentSecondary,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer { rotationZ = chevronRot },
+                )
+            }
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    content = content,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun InstallPinnedNextBar(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    onDisabledClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LocalDarkNightGlass.current
+    val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
+    val palette = themeState.palette
+    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+
+    val fadeBottom = if (glass.isDark) {
+        palette.deepBase.copy(alpha = 0.85f)
+    } else {
+        glass.surface.copy(alpha = 0.85f)
+    }
+    val pillShape = RoundedCornerShape(999.dp)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Brush.verticalGradient(listOf(Color.Transparent, fadeBottom)))
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = bottomInset + 12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(pillShape)
+                .then(
+                    if (enabled) {
+                        Modifier
+                            .background(Brush.horizontalGradient(listOf(palette.buttonStart, palette.buttonEnd)))
+                            .border(1.dp, Color.White.copy(alpha = 0.28f), pillShape)
+                    } else {
+                        Modifier
+                            .background(Color.White.copy(alpha = 0.12f))
+                            .border(1.dp, glass.outline.copy(alpha = 0.55f), pillShape)
+                    }
+                )
+                .clickable { if (enabled) onClick() else onDisabledClick() }
+                .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.install_next),
+                color = if (enabled) Color.White else glass.content.copy(alpha = 0.40f),
+                fontSize = 15.5.sp,
+                fontWeight = FontWeight.Bold,
+            )
         }
     }
 }

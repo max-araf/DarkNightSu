@@ -43,6 +43,21 @@ object BootImageExtractor {
         return Res(r.isSuccess, r.out)
     }
 
+    /**
+     * Partition size in bytes. Some phones (e.g. Samsung toybox) have no working `blockdev`, so we try
+     * three ways: blockdev, /sys/class/block/<dev>/size (512-byte sectors), /proc/partitions (1 KiB blocks).
+     */
+    private fun sizeOf(path: String): Long {
+        sh("blockdev --getsize64 '$path' 2>/dev/null").out.firstOrNull()?.trim()?.toLongOrNull()?.let { if (it > 0) return it }
+        val dev = sh("basename \"$(readlink -f '$path')\"").out.firstOrNull()?.trim().orEmpty()
+        if (dev.isNotEmpty()) {
+            sh("cat /sys/class/block/$dev/size 2>/dev/null").out.firstOrNull()?.trim()?.toLongOrNull()?.let { if (it > 0) return it * 512 }
+            sh("grep -w '$dev' /proc/partitions 2>/dev/null | head -n 1").out.firstOrNull()?.trim()
+                ?.split(Regex("\\s+"))?.getOrNull(2)?.toLongOrNull()?.let { if (it > 0) return it * 1024 }
+        }
+        return 0L
+    }
+
     private fun byNameDir(): String? {
         listOf("/dev/block/by-name", "/dev/block/bootdevice/by-name").forEach {
             if (sh("[ -d '$it' ]").ok) return it
@@ -61,9 +76,7 @@ object BootImageExtractor {
             for (c in candidates) {
                 val path = "$dir/$c"
                 if (sh("[ -e '$path' ]").ok) {
-                    val size = sh("blockdev --getsize64 '$path' 2>/dev/null").out
-                        .firstOrNull()?.trim()?.toLongOrNull() ?: 0L
-                    result.add(PartitionInfo(c, path, size))
+                    result.add(PartitionInfo(c, path, sizeOf(path)))
                     break
                 }
             }

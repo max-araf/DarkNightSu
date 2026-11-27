@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cmp_details_show">Show details</string>
+    <string name="cmp_details_hide">Hide details</string>
+    <string name="cmp_summary_line">%1$d to check · %2$d fine</string>
+    <string name="install_quick_title">Quick start</string>
+    <string name="install_quick_desc">Best method for your phone: %1$s</string>
+    <string name="install_quick_start">Start</string>
+    <string name="install_quick_need_check">Check your phone first to see the best method.</string>
+    <string name="install_step_check">1. Check your phone</string>
+    <string name="install_step_install">2. Install</string>
+    <string name="install_other_methods">Other methods</string>
+    <string name="install_tools_title">Backup and tools</string>
+    <string name="install_recommended">Recommended</string>
+    <string name="install_extract_sizes_unknown">Size unknown</string>
+</resources>

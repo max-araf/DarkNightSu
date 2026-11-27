@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cmp_details_show">বিস্তারিত দেখুন</string>
+    <string name="cmp_details_hide">বিস্তারিত লুকান</string>
+    <string name="cmp_summary_line">%1$d টি দেখার মতো · %2$d টি ঠিক আছে</string>
+    <string name="install_quick_title">দ্রুত শুরু</string>
+    <string name="install_quick_desc">আপনার ফোনের জন্য সেরা পদ্ধতি: %1$s</string>
+    <string name="install_quick_start">শুরু করুন</string>
+    <string name="install_quick_need_check">সেরা পদ্ধতি জানতে আগে ফোন চেক করুন।</string>
+    <string name="install_step_check">১. ফোন চেক করুন</string>
+    <string name="install_step_install">২. ইনস্টল করুন</string>
+    <string name="install_other_methods">অন্যান্য পদ্ধতি</string>
+    <string name="install_tools_title">ব্যাকআপ ও টুলস</string>
+    <string name="install_recommended">সুপারিশকৃত</string>
+    <string name="install_extract_sizes_unknown">সাইজ অজানা</string>
+</resources>

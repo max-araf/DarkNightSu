@@ -79,6 +79,7 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         ksuApp = this
+        com.kazesu.manager.ui.util.RootExec.shellProvider = { com.kazesu.manager.ui.util.getRootShell() }
         if (AiFeatureBridge.isAvailable) AiFeatureBridge.install(ManagerAiHost(this))
 
         if (!isUserUnlocked()) {

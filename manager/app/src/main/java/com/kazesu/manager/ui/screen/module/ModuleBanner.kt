@@ -99,6 +99,31 @@ fun rememberModuleBanner(moduleId: String, banner: String?): ImageBitmap? {
     return bitmap
 }
 
+fun Modifier.moduleBannerGlass(banner: ImageBitmap?, imageAlpha: Float = 0.26f): Modifier {
+    if (banner == null) return this
+    return drawWithCache {
+        val scale = maxOf(size.width / banner.width, size.height / banner.height)
+        val srcW = (size.width / scale).roundToInt().coerceIn(1, banner.width)
+        val srcH = (size.height / scale).roundToInt().coerceIn(1, banner.height)
+        val srcOffset = IntOffset((banner.width - srcW) / 2, (banner.height - srcH) / 2)
+        val srcSize = IntSize(srcW, srcH)
+        val dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt())
+        val scrim = Brush.verticalGradient(
+            listOf(Color.Black.copy(alpha = 0.35f), Color.Black.copy(alpha = 0.65f))
+        )
+        onDrawBehind {
+            drawImage(
+                image = banner,
+                srcOffset = srcOffset,
+                srcSize = srcSize,
+                dstSize = dstSize,
+                alpha = imageAlpha,
+            )
+            drawRect(scrim)
+        }
+    }
+}
+
 fun Modifier.moduleBanner(banner: ImageBitmap?, scrim: Color): Modifier {
     if (banner == null) return this
     return drawWithCache {

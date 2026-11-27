@@ -124,6 +124,11 @@ import com.kazesu.manager.ui.theme.LocalBackgroundImagePath
 import com.kazesu.manager.ui.theme.LocalEnableBlur
 import com.kazesu.manager.ui.theme.LocalModuleDescriptionMaxLines
 import com.kazesu.manager.ui.theme.backgroundAwareCardColors
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import com.kazesu.manager.ui.theme.darkNightGlassCardSurface
+import com.kazesu.manager.ui.theme.LocalDarkNightGlass
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.geometry.Offset
 import com.kazesu.manager.ui.theme.isInDarkTheme
 import com.kazesu.manager.ui.util.BlurredBar
 import com.kazesu.manager.ui.util.getFileName
@@ -914,13 +919,23 @@ fun ModuleItem(
     var expanded by rememberSaveable(module.id) { mutableStateOf(false) }
     val dragHandleInteractionSource = remember { MutableInteractionSource() }
     val banner = rememberModuleBanner(module.id, module.bannerPath)
+    val glass = LocalDarkNightGlass.current
+    val hasBanner = banner != null
+    val bannerCardShape = RoundedCornerShape(CardDefaults.CornerRadius)
+    val bannerTitleColor = if (hasBanner) (if (glass.isDark) glass.content else Color.White) else colorScheme.onSurface
+    val bannerSubColor = if (hasBanner) (if (glass.isDark) glass.contentSecondary else Color.White.copy(alpha = 0.86f)) else colorScheme.onSurfaceVariantSummary
+    val bannerTextShadow = if (hasBanner) Shadow(
+        color = Color.Black.copy(alpha = 0.60f),
+        offset = Offset(0f, 1.5f),
+        blurRadius = 4f,
+    ) else null
 
     AppCard(
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp),
         insideMargin = PaddingValues(0.dp),
-        colors = backgroundAwareCardColors(),
+        colors = if (hasBanner) CardDefaults.defaultColors(color = Color.Transparent) else backgroundAwareCardColors(),
         onClick = {
             if (hasDescription) expanded = !expanded
         },
@@ -929,8 +944,16 @@ fun ModuleItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (hasBanner) {
+                        Modifier
+                            .darkNightGlassCardSurface(shape = bannerCardShape)
+                            .moduleBannerGlass(banner, imageAlpha = 0.26f)
+                    } else {
+                        Modifier
+                    }
+                )
                 .alpha(if (module.enabled || module.remove) 1f else 0.6f)
-                .moduleBanner(banner, colorScheme.surfaceContainer)
                 .padding(16.dp)
         ) {
             Row(
@@ -1004,7 +1027,8 @@ fun ModuleItem(
                                 text = module.name,
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight(550),
-                                color = colorScheme.onSurface,
+                                color = bannerTitleColor,
+                                style = top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.body1.copy(shadow = bannerTextShadow),
                                 textDecoration = textDecoration,
                                 onTextLayout = { nameTextLayout = it }
                             )
@@ -1027,7 +1051,8 @@ fun ModuleItem(
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 2.dp, bottom = 1.dp),
                         fontFamily = FontFamily.Monospace,
-                        color = colorScheme.onSurfaceVariantSummary,
+                        color = bannerSubColor,
+                        style = top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.footnote1.copy(shadow = bannerTextShadow),
                         textDecoration = textDecoration
                     )
                     module.preinitWarning()?.let {
@@ -1080,7 +1105,7 @@ fun ModuleItem(
                         .fillMaxWidth()
                         .padding(top = 2.dp),
                     fontSize = 14.sp,
-                    color = colorScheme.onSurfaceVariantSummary,
+                    color = bannerSubColor,
                     textDecoration = textDecoration
                 )
             }

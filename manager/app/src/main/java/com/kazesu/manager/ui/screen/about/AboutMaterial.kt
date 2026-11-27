@@ -21,6 +21,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.sp
 import com.kazesu.manager.ui.theme.DarkNightLinks
 import com.kazesu.manager.ui.theme.LocalDarkNightGlass
+import com.kazesu.manager.ui.theme.DarkNightThemeStore
+import com.kazesu.manager.ui.component.DarkNightMaxLogo
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.width
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,10 +40,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import com.kazesu.manager.ui.util.rememberNavBottom
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -197,6 +198,7 @@ fun AboutScreenMaterial(
             if (contributors.isNotEmpty()) {
                 item {
                     val glass = LocalDarkNightGlass.current
+                    val themeState by DarkNightThemeStore.state.collectAsStateWithLifecycle()
                     Row(
                         modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -233,16 +235,32 @@ fun AboutScreenMaterial(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
-                                if (avatar != null) {
-                                    Image(
-                                        bitmap = avatar,
-                                        contentDescription = contributor.login,
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier
-                                            .width(132.dp)
-                                            .aspectRatio(3f / 2f)
-                                            .clip(RoundedCornerShape(16.dp)),
+                                if (contributor.login.equals("max-araf", ignoreCase = true)) {
+                                    DarkNightMaxLogo(
+                                        accent = themeState.palette.primaryGlow,
+                                        modifier = Modifier.width(132.dp),
+                                        cornerRadius = 16.dp,
                                     )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(72.dp)
+                                            .clip(RoundedCornerShape(18.dp))
+                                            .background(glass.surfaceHi)
+                                            .border(1.dp, glass.outline, RoundedCornerShape(18.dp)),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (avatar != null) {
+                                            Image(
+                                                bitmap = avatar,
+                                                contentDescription = contributor.login,
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(4.dp),
+                                            )
+                                        }
+                                    }
                                 }
                                 Column(
                                     modifier = Modifier.weight(1f),
@@ -277,7 +295,12 @@ fun AboutScreenMaterial(
                 }
             }
             item {
-                Spacer(Modifier.height(rememberNavBottom() + 24.dp))
+                Spacer(
+                    Modifier.height(
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                    )
+                )
             }
         }
     }
