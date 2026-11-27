@@ -123,9 +123,9 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
     }
 
 /*
- * 2048 covers 4096-bit RSA certificates. The KazeSU/OriginSU manager cert is
+ * 2048 covers 4096-bit RSA certificates. The DarkNightSu manager cert is
  * 0x51c (1308) bytes, so the old 1024-byte stack buffer rejected every
- * legitimate KazeSU APK with "cert length overlimit" and the manager kept
+ * legitimate DarkNightSu APK with "cert length overlimit" and the manager kept
  * reporting "Not installed". Heap-allocate it: a stack array this size trips
  * the kernel's frame-size limit.
  */

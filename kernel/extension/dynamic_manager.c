@@ -31,7 +31,7 @@
 #define DYNAMIC_MANAGER_VERSION 1
 /*
  * Upper bound for the signing certificate DER length. Only the size and hash are
- * stored, so this is a sanity check rather than a buffer limit. KazeSU's release
+ * stored, so this is a sanity check rather than a buffer limit. DarkNightSu's release
  * certificate is 1308 bytes (0x51c), which the old 1024 cap rejected with
  * -EINVAL and made "Add manager" fail for every build signed with it.
  */
