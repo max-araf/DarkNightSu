@@ -268,9 +268,6 @@ fun HomePagerMiuix(
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(maxOf(bottomInnerPadding, rememberNavBottom()) + 24.dp))
-                                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp
-                            )
-                        )
                     }
                 }
             }
