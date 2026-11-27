@@ -439,7 +439,7 @@ sealed class FlashFailureDiag {
     data object Unknown : FlashFailureDiag()
 }
 
-private val BOOTIMAGE_VER_RE = Regex("bootimage\s+version\s+(\d+)[^\n]*not\s+supported", RegexOption.IGNORE_CASE)
+private val BOOTIMAGE_VER_RE = Regex("bootimage\\s+version\\s+(\\d+)[^\n]*not\\s+supported", RegexOption.IGNORE_CASE)
 
 fun diagnoseFlashFailure(logText: String): FlashFailureDiag {
     BOOTIMAGE_VER_RE.find(logText)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let { ver ->
