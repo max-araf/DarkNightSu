@@ -1,4 +1,4 @@
-name: Build KazeZygisk
+name: Build DarkNightZygisk
 
 # Builds the KazeZygisk payload that ksud embeds as its built-in Zygisk engine.
 #

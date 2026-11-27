@@ -1,4 +1,4 @@
-name: Build Manager
+name: Build DarkNightSu Manager
 
 on:
   workflow_dispatch:

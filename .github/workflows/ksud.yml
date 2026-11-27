@@ -1,4 +1,4 @@
-name: Build ksud
+name: Build DarkNightSu ksud
 on:
   workflow_call:
     inputs:

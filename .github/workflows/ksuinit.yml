@@ -1,4 +1,4 @@
-name: Build ksuinit
+name: Build DarkNightSu ksuinit
 on:
   workflow_call:
     inputs:

@@ -1,4 +1,4 @@
-name: Build KernelSU Kernel Module
+name: Build DarkNightSu Kernel Module
 
 on:
   workflow_call:
