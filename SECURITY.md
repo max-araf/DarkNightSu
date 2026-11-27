@@ -1,7 +1,20 @@
-# Reporting Security Issues
+# Security Policy — DarkNightSu
 
-The KernelSU team and community take security bugs in KernelSU seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+## Official Releases
 
-To report a security issue, please use the GitHub Security Advisory ["Report a Vulnerability"](https://github.com/tiann/KernelSU/security/advisories/new) tab, or you can mailto [weishu](mailto:twsxtd@gmail.com) directly.
+Only APKs downloaded from:
+- [GitHub Releases](https://github.com/max-araf/DarkNightSu/releases)
+- [Official Telegram Manager Topic](https://t.me/darknightsu/2)
 
-The KernelSU team will send a response indicating the next steps in handling your report. After the initial reply to your report, the security team will keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
+are signed with the official **DarkNightSu** release keystore (`com.darknight.ksu`).
+
+## Reporting a Vulnerability or Critical Bug
+
+If you discover a security issue, privilege escalation flaw, or bootloop bug:
+
+1. Do **not** post exploit details publicly in general chat.
+2. Report privately to the maintainer (**MAX ARAF**) via Telegram: [@Max_araf_2010](https://t.me/Max_araf_2010), or open a report in the [Issues topic](https://t.me/darknightsu/8) / [GitHub Issues](https://github.com/max-araf/DarkNightSu/issues) with:
+   - Device model & chipset
+   - Kernel version (`uname -a`) and GKI/Non-GKI status
+   - DarkNightSu Manager version
+   - Compatibility report or log output (from **Settings → Send Logs**)
