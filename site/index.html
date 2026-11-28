@@ -2,198 +2,505 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DarkNightSu — Root, dressed in glass</title>
-<meta name="description" content="DarkNightSu: a kernel-based root manager for Android with a frosted-glass UI, 10 live palettes and a kernel toolbox.">
-<meta name="theme-color" content="#06080E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%232563FF'/%3E%3Crect x='20' y='20' width='28' height='28' rx='6' fill='white'/%3E%3Crect x='52' y='52' width='28' height='28' rx='6' fill='white'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DarkNightSu — Kernel root manager, dressed in glass</title>
+<meta name="description" content="DarkNightSu is a kernel-based root manager for Android: frosted-glass UI, 10 live palettes, DarkNight Toolbox, DarkTune, SuSFS, KPM and a built-in root compatibility checker.">
+<meta name="theme-color" content="#07090F" id="tc">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DarkNightSu — Kernel root manager, dressed in glass">
+<meta property="og:description" content="Frosted-glass kernel root manager for Android. 10 palettes, DarkNight Toolbox, DarkTune, SuSFS, KPM and a root compatibility checker.">
+<meta property="og:image" content="https://max-araf.github.io/DarkNightSu/img/og.png">
+<meta property="og:url" content="https://max-araf.github.io/DarkNightSu/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://max-araf.github.io/DarkNightSu/img/og.png">
+<link rel="icon" type="image/png" href="img/logo-sm.png">
+<link rel="apple-touch-icon" href="img/logo.png">
 <style>
-:root{--a:#2563FF;--bg:#06080E;--ink:#EEF2FF;--mut:#8D98B5;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.1);--r:24px;--mx:50%;--my:30%}
+:root{--a:#2F6BFF;--bg:#07090F;--ink:#EEF2FF;--mut:#8D98B5;--card:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--r:26px;--mx:50%;--my:30%;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Inter,system-ui,sans-serif;overflow-x:hidden}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Inter,system-ui,sans-serif;overflow-x:hidden;transition:background .6s}
 a{color:inherit;text-decoration:none}
-.glow{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(520px circle at var(--mx) var(--my),color-mix(in srgb,var(--a) 28%,transparent),transparent 70%);transition:background .5s}
+img{max-width:100%}
+button{font:inherit;color:inherit}
+.glow{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(520px circle at var(--mx) var(--my),color-mix(in srgb,var(--a) 26%,transparent),transparent 70%)}
 .aur{position:fixed;inset:0;z-index:-3;overflow:hidden;pointer-events:none}
-.aur i{position:absolute;border-radius:50%;filter:blur(100px);background:var(--a);transition:background .8s}
-.aur i:nth-child(1){width:560px;height:560px;left:-160px;top:-140px;opacity:.3;animation:d1 20s ease-in-out infinite alternate}
-.aur i:nth-child(2){width:460px;height:460px;right:-140px;top:30%;opacity:.2;animation:d2 24s ease-in-out infinite alternate}
+.aur i{position:absolute;border-radius:50%;filter:blur(110px);background:var(--a);transition:background .8s}
+.aur i:nth-child(1){width:560px;height:560px;left:-160px;top:-140px;opacity:.32;animation:d1 20s ease-in-out infinite alternate}
+.aur i:nth-child(2){width:460px;height:460px;right:-140px;top:34%;opacity:.2;animation:d2 24s ease-in-out infinite alternate}
 .aur i:nth-child(3){width:520px;height:520px;left:20%;bottom:-240px;opacity:.18;animation:d1 28s ease-in-out infinite alternate-reverse}
 @keyframes d1{to{transform:translate(80px,60px) scale(1.1)}}@keyframes d2{to{transform:translate(-70px,80px)}}
 .stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
-.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
 /* nav */
-nav{position:fixed;top:12px;left:0;right:0;z-index:20;padding:0 16px}
-nav .bar{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:9px 12px 9px 16px;border-radius:999px;background:rgba(8,11,20,.6);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700}
-.brand svg{width:28px;height:28px}
+nav{position:fixed;top:12px;left:0;right:0;z-index:30;padding:0 14px}
+nav .bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:8px 10px 8px 14px;border-radius:999px;background:color-mix(in srgb,var(--bg) 62%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+.brand img{width:30px;height:30px;border-radius:9px}
 nav ul{display:flex;gap:2px;list-style:none;padding:0;align-items:center}
 nav ul a{padding:7px 12px;border-radius:999px;font-size:14px;color:var(--mut);transition:.2s}
 nav ul a:hover{color:var(--ink);background:var(--card)}
-@media(max-width:720px){nav ul li:not(:last-child){display:none}}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid var(--line);background:var(--card);transition:.25s;color:var(--ink);cursor:pointer;position:relative;overflow:hidden}
+@media(max-width:820px){nav ul li:not(:last-child){display:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid var(--line);background:var(--card);transition:.25s;color:var(--ink);cursor:pointer;position:relative;overflow:hidden;white-space:nowrap}
 .btn:hover{transform:translateY(-3px);border-color:var(--a)}
 .btn.p{background:linear-gradient(135deg,var(--a),color-mix(in srgb,var(--a) 50%,#000));border-color:transparent;box-shadow:0 12px 34px -10px var(--a);color:#fff}
 .btn.p::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);animation:shine 3.5s infinite}
 @keyframes shine{40%,100%{transform:translateX(120%)}}
 .btn.sm{padding:8px 16px;font-size:14px}
+.btn svg{width:18px;height:18px;flex:none}
 /* hero */
-.hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:110px 0 50px}
-.logo{width:150px;height:150px;position:relative;margin-bottom:26px;filter:drop-shadow(0 22px 50px var(--a));animation:fl 6s ease-in-out infinite}
-@keyframes fl{50%{transform:translateY(-10px)}}
-.logo svg{width:100%;height:100%;overflow:visible}
-.sq{transform-box:fill-box;transform-origin:center;opacity:0}
-.s1{animation:in1 1.5s .15s cubic-bezier(.2,.9,.25,1) forwards}
-.s2{animation:in2 1.5s .15s cubic-bezier(.2,.9,.25,1) forwards}
-.s3,.s4{animation:inb 1.2s 1.3s ease forwards}
-@keyframes in1{0%{opacity:0;transform:translate(-120px,-90px) rotate(-120deg) scale(.4)}60%{opacity:1}100%{opacity:1;transform:none}}
-@keyframes in2{0%{opacity:0;transform:translate(120px,90px) rotate(120deg) scale(.4)}60%{opacity:1}100%{opacity:1;transform:none}}
-@keyframes inb{to{opacity:1}}
-.ring{position:absolute;inset:-26px;border-radius:50%;border:1px solid var(--line);animation:pulse 3.4s 1.5s ease-out infinite;opacity:0}
-@keyframes pulse{0%{transform:scale(.8);opacity:.7}100%{transform:scale(1.5);opacity:0}}
-h1{font-size:clamp(44px,9vw,88px);line-height:1.03;letter-spacing:-2px;font-weight:800}
-h1 .w{display:inline-block;opacity:0;transform:translateY(30px);animation:up .8s forwards}
-h1 .w:nth-child(1){animation-delay:.9s}h1 .w:nth-child(2){animation-delay:1.05s}h1 .w:nth-child(3){animation-delay:1.2s}
-@keyframes up{to{opacity:1;transform:none}}
+.hero{min-height:100svh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:30px;padding:110px 20px 50px}
+.hero .txt{display:flex;flex-direction:column;align-items:flex-start}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--a) 50%,transparent);background:color-mix(in srgb,var(--a) 14%,transparent);font-size:13px;font-weight:600;margin-bottom:18px}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 12px var(--a)}
+.logo{width:92px;height:92px;margin-bottom:20px;filter:drop-shadow(0 18px 38px var(--a));animation:fl 6s ease-in-out infinite;border-radius:24px}
+@keyframes fl{50%{transform:translateY(-8px)}}
+h1{font-size:clamp(40px,7.6vw,78px);line-height:1.03;letter-spacing:-2px;font-weight:800}
 h1 b{background:linear-gradient(90deg,var(--a),color-mix(in srgb,var(--a) 35%,#fff),var(--a));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 5s linear infinite}
 @keyframes sh{to{background-position:200%}}
-.tag{margin:18px auto 30px;max-width:580px;color:var(--mut);font-size:18px;min-height:56px}
+.tag{margin:18px 0 28px;max-width:540px;color:var(--mut);font-size:18px;min-height:56px}
 .tag span{color:var(--ink)}
-.cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.pal{margin-top:38px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.pal{margin-top:34px;display:flex;flex-direction:column;gap:10px}
 .pal small{color:var(--mut);font-size:13px}
-.dots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.dots button{width:32px;height:32px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--line);transition:.25s}
+.dots{display:flex;gap:10px;flex-wrap:wrap}
+.dots button{width:32px;height:32px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;box-shadow:0 0 0 1px var(--line);transition:.25s;padding:0}
 .dots button:hover{transform:scale(1.18)}
 .dots button.on{border-color:#fff;box-shadow:0 0 20px var(--c)}
 .pname{font-weight:600;font-size:14px}
+.hero .ph0{justify-self:center;position:relative}
+.heroph{width:min(300px,64vw);border-radius:40px;padding:9px;background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.04));border:1px solid var(--line);box-shadow:0 50px 100px -30px var(--a);transition:transform .2s ease-out,box-shadow .6s;transform-style:preserve-3d;perspective:900px}
+.heroph img{display:block;width:100%;height:auto;border-radius:32px;background:#000}
+@media(max-width:860px){.hero{grid-template-columns:1fr;text-align:center;padding-top:104px}.hero .txt{align-items:center}.cta{justify-content:center}.pal{align-items:center}.dots{justify-content:center}}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:6px}
+.stat{padding:18px 16px;border-radius:20px;background:var(--card);border:1px solid var(--line);text-align:center;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.stat b{display:block;font-size:26px;letter-spacing:-.5px;color:var(--a)}
+.stat span{font-size:13px;color:var(--mut)}
 /* sections */
-section{padding:84px 0 4px}
+section{padding:92px 0 4px}
 .eye{font-size:12px;letter-spacing:2.2px;text-transform:uppercase;color:var(--a);font-weight:700}
 h2{font-size:clamp(30px,5.4vw,46px);letter-spacing:-1px;line-height:1.1;margin:8px 0 10px}
-.sub{color:var(--mut);max-width:560px;margin-bottom:32px}
+.sub{color:var(--mut);max-width:620px;margin-bottom:30px}
+.sub b{color:var(--ink)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
-.card{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:transform .3s,border-color .3s}
+.card{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:border-color .3s}
 .card:hover{border-color:color-mix(in srgb,var(--a) 60%,transparent)}
 .card::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;left:var(--cx,50%);top:var(--cy,0);transform:translate(-50%,-50%);background:radial-gradient(circle,color-mix(in srgb,var(--a) 30%,transparent),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
 .card:hover::after{opacity:1}
 .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;margin-bottom:14px;background:color-mix(in srgb,var(--a) 22%,transparent);color:var(--a);font-size:21px}
 .card h3{font-size:18px;margin-bottom:6px}.card p{color:var(--mut);font-size:15px}
-/* phones */
-.phones{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;perspective:1200px}
-.phone{width:250px;border-radius:34px;padding:8px;background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.04));border:1px solid var(--line);box-shadow:0 40px 80px -30px var(--a);transition:transform .2s ease-out;transform-style:preserve-3d}
-.phone img{display:block;width:100%;border-radius:27px}
-.phone:nth-child(2){margin-top:46px}
-.cap{text-align:center;color:var(--mut);font-size:14px;margin-top:14px}
+/* ===== screenshot carousel ===== */
+.palbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:-8px 0 22px;padding:12px 16px;border-radius:22px;background:var(--card);border:1px solid var(--line);width:fit-content;max-width:100%}
+.palbar .dots button{width:28px;height:28px}
+.palbar .pname{min-width:110px}
+.palbar small{color:var(--mut);font-size:13px}
+.carwrap{position:relative;margin:0 -20px}
+.rail{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding:18px 20px 26px;scroll-padding:0 20px;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}
+.rail::-webkit-scrollbar{display:none}
+.rail.drag{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
+.shot{flex:0 0 auto;scroll-snap-align:center;width:min(270px,66vw);transition:transform .35s,opacity .35s;opacity:.62;transform:scale(.93)}
+.shot.cur{opacity:1;transform:scale(1)}
+.shot .ph{display:block;width:100%;padding:8px;border-radius:36px;background:linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.04));border:1px solid var(--line);box-shadow:0 34px 70px -34px var(--a);cursor:zoom-in;transition:box-shadow .6s}
+.shot img{display:block;width:100%;height:auto;border-radius:29px;background:#000;-webkit-user-drag:none;user-select:none}
+.shot figcaption{margin-top:16px;text-align:center;padding:0 4px}
+.shot figcaption b{display:block;font-size:16px;letter-spacing:-.2px}
+.shot figcaption span{display:block;color:var(--mut);font-size:13.5px;line-height:1.45;margin-top:3px}
+.arr{position:absolute;top:44%;z-index:5;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);display:grid;place-items:center;cursor:pointer;transition:.2s}
+.arr:hover{border-color:var(--a);background:color-mix(in srgb,var(--a) 30%,var(--bg))}
+.arr.l{left:10px}.arr.r{right:10px}
+.arr svg{width:20px;height:20px}
+@media(max-width:700px){.arr{display:none}}
+.pager{display:flex;gap:7px;justify-content:center;margin-top:2px}
+.pager button{width:8px;height:8px;border-radius:99px;border:0;background:var(--line);cursor:pointer;padding:0;transition:.3s}
+.pager button.on{width:26px;background:var(--a)}
+.hint{text-align:center;color:var(--mut);font-size:13px;margin-top:12px}
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(3,5,10,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.lb.on{display:flex}
+.lb figure{display:flex;flex-direction:column;align-items:center;max-height:100%;padding:18px 70px;touch-action:pan-y}
+.lb img{max-height:calc(100svh - 120px);max-width:100%;width:auto;height:auto;border-radius:26px;box-shadow:0 40px 100px -30px var(--a);border:1px solid var(--line)}
+.lb figcaption{margin-top:12px;text-align:center}
+.lb figcaption b{display:block}.lb figcaption span{color:var(--mut);font-size:14px}
+.lb .arr{top:50%;transform:translateY(-50%)}
+.lb .x{position:absolute;top:16px;right:16px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:22px;line-height:1}
+@media(max-width:700px){.lb figure{padding:60px 12px 18px}.lb .arr{display:grid;top:auto;bottom:18px;transform:none;width:42px;height:42px}.lb .arr.l{left:18px}.lb .arr.r{right:18px}}
+/* checker */
+.split{display:grid;grid-template-columns:1fr 330px;gap:40px;align-items:center}
+.split .heroph{width:290px}
+@media(max-width:900px){.split{grid-template-columns:1fr}.split .visual{order:-1;justify-self:center}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13.5px}
+.chip b{color:var(--a)}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:24px 0 8px}
+.fl{padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--line);position:relative}
+.fl i{font-style:normal;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--a);color:#fff;font-weight:800;font-size:14px;margin-bottom:10px}
+.fl>b{display:block;margin-bottom:2px}.fl span{color:var(--mut);font-size:14px}.fl span b{color:var(--ink)}
+.sev{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 0}
+.sev span{font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:999px;letter-spacing:.3px}
+.sev .ok{background:rgba(52,199,89,.16);color:#6fe28d}.sev .in{background:rgba(120,160,255,.16);color:#9bb8ff}.sev .wa{background:rgba(255,200,60,.16);color:#ffd460}.sev .ri{background:rgba(255,140,60,.18);color:#ffa05c}.sev .bl{background:rgba(255,70,70,.18);color:#ff8585}
+.helper{margin-top:34px;padding:26px;border-radius:30px;background:linear-gradient(160deg,color-mix(in srgb,var(--a) 14%,transparent),var(--card));border:1px solid color-mix(in srgb,var(--a) 32%,var(--line))}
+.helper h3{font-size:20px;margin-bottom:4px}
+.helper p.s{color:var(--mut);font-size:14.5px;margin-bottom:16px}
+.sel{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sel label{font-size:12px;text-transform:uppercase;letter-spacing:1.3px;color:var(--mut);font-weight:700;display:block;margin-bottom:6px}
+.sel select{width:100%;padding:13px 14px;border-radius:16px;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--line);font:inherit;appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 20px) 52%,calc(100% - 14px) 52%;background-size:6px 6px;background-repeat:no-repeat}
+.res{margin-top:16px;padding:18px 20px;border-radius:20px;background:rgba(0,0,0,.3);border:1px solid var(--line)}
+.res>b{display:block;font-size:18px;margin-bottom:4px;color:var(--a)}.res p b{color:var(--ink)}
+.res p{color:var(--ink);font-size:15px}
+.res small{display:block;color:var(--mut);margin-top:8px}
 /* tables */
-.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:var(--card)}
-table{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
-th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line)}
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:var(--card);margin-top:34px}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:600px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--mut);font-size:12.5px;text-transform:uppercase;letter-spacing:1px}tr:last-child td{border:0}
 code{font:13px ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px}
 .warn{margin-top:18px;padding:20px 22px;border-radius:var(--r);border:1px solid rgba(255,90,90,.4);background:rgba(255,70,70,.07)}
 .warn b{color:#ff8a8a}
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;counter-reset:s}
-.step{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative}
+/* steps + code */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;counter-reset:s}
+.step{padding:24px;border-radius:var(--r);background:var(--card);border:1px solid var(--line)}
 .step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--a);color:#fff;font-weight:800;margin-bottom:12px}
 .step p{color:var(--mut);font-size:15px}
-.cta2{margin-top:30px;padding:44px 24px;border-radius:32px;text-align:center;background:linear-gradient(160deg,color-mix(in srgb,var(--a) 24%,transparent),var(--card));border:1px solid color-mix(in srgb,var(--a) 40%,transparent)}
+.codebox{margin-top:22px;border-radius:22px;border:1px solid var(--line);background:rgba(0,0,0,.4);overflow:hidden}
+.codebox .h{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 10px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut)}
+.codebox pre{padding:16px 18px;overflow-x:auto;font:13.5px/1.6 ui-monospace,Menlo,Consolas,monospace;color:#cfe0ff}
+.copy{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 14px;cursor:pointer;font-size:13px}
+.copy:hover{border-color:var(--a)}
+/* faq */
+details{border-radius:20px;background:var(--card);border:1px solid var(--line);padding:0 20px;margin-bottom:10px;transition:border-color .3s}
+details[open]{border-color:color-mix(in srgb,var(--a) 50%,transparent)}
+summary{cursor:pointer;padding:16px 0;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:14px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--a);font-size:22px;line-height:1;transition:transform .3s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--mut);padding:0 0 18px;font-size:15px}
+/* links */
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.lk{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:24px;background:var(--card);border:1px solid var(--line);transition:.25s}
+.lk:hover{transform:translateY(-4px);border-color:var(--a);box-shadow:0 18px 40px -22px var(--a)}
+.lk .i{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 22%,transparent);color:var(--a);flex:none}
+.lk .i svg{width:24px;height:24px}
+.lk b{display:block;font-size:16px}.lk span{color:var(--mut);font-size:13.5px}
+.cta2{margin-top:70px;padding:48px 24px;border-radius:34px;text-align:center;background:linear-gradient(160deg,color-mix(in srgb,var(--a) 26%,transparent),var(--card));border:1px solid color-mix(in srgb,var(--a) 40%,transparent)}
 .cta2 h2{margin-top:0}
+.cta2 .cta{justify-content:center}
 footer{margin-top:80px;padding:34px 0 50px;border-top:1px solid var(--line);text-align:center;color:var(--mut);font-size:14px}
 footer a{color:var(--ink);border-bottom:1px solid var(--line)}
-.rv{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .8s,transform .8s}
 .rv.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.sq,h1 .w{opacity:1;transform:none}.ring{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
 </style>
 </head>
 <body>
 <div class="aur"><i></i><i></i><i></i></div><div class="glow"></div><canvas class="stars" id="st"></canvas>
 
 <svg width="0" height="0" style="position:absolute"><defs>
-<linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="color-mix(in srgb,var(--a) 50%,#fff)"/><stop offset=".5" stop-color="var(--a)"/><stop offset="1" stop-color="color-mix(in srgb,var(--a) 42%,#000)"/></linearGradient>
-<symbol id="mini" viewBox="0 0 100 100"><rect x="4" y="4" width="92" height="92" rx="26" fill="url(#lg)"/><rect x="20" y="20" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect x="51" y="51" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect x="51" y="20" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/><rect x="20" y="51" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/></symbol></defs></svg>
+<symbol id="i-dl" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></symbol>
+<symbol id="i-tg" viewBox="0 0 24 24"><path fill="currentColor" d="M9.8 15.6l-.4 4.2c.6 0 .9-.3 1.2-.6l2.9-2.7 6 4.4c1.1.6 1.9.3 2.2-1L23.9 4.6c.4-1.6-.6-2.2-1.6-1.8L1.2 10.9c-1.5.6-1.5 1.4-.3 1.8l5.4 1.7L18.9 6.5c.6-.4 1.1-.2.7.2L9.8 15.6z"/></symbol>
+<symbol id="i-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></symbol>
+<symbol id="i-bug" viewBox="0 0 24 24"><path fill="currentColor" d="M20 8h-2.8a6 6 0 0 0-1.9-2.2L17 4.4 15.6 3l-2.2 2.2a6 6 0 0 0-2.8 0L8.4 3 7 4.4l1.7 1.4A6 6 0 0 0 6.8 8H4v2h2.1c-.1.3-.1.7-.1 1v1H4v2h2v1c0 .3 0 .7.1 1H4v2h2.8a6 6 0 0 0 10.4 0H20v-2h-2.1c.1-.3.1-.7.1-1v-1h2v-2h-2v-1c0-.3 0-.7-.1-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path fill="currentColor" d="M21.4 11.6l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .5.2 1 .6 1.4l9 9c.8.8 2 .8 2.8 0l7-7c.8-.8.8-2 0-2.8zM6.5 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path fill="currentColor" d="M19.4 10a7.5 7.5 0 0 0-14.3-2A6 6 0 0 0 6 20h13a5 5 0 0 0 .4-10z"/></symbol>
+<symbol id="i-l" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></symbol>
+</defs></svg>
 
-<nav><div class="bar"><a class="brand" href="#top"><svg><use href="#mini"/></svg>DarkNightSu</a>
-<ul><li><a href="#features">Features</a></li><li><a href="#screens">Screens</a></li><li><a href="#compat">Compatibility</a></li><li><a href="#install">Install</a></li><li><a class="btn p sm" data-link="releases" href="#">Download</a></li></ul></div></nav>
+<nav><div class="bar"><a class="brand" href="#top"><img data-rc src="img/logo-sm.png" alt="" width="30" height="30">DarkNightSu</a>
+<ul><li><a href="#screens">Screens</a></li><li><a href="#features">Features</a></li><li><a href="#checker">Checker</a></li><li><a href="#install">Install</a></li><li><a href="#community">Community</a></li><li><a class="btn p sm" data-link="releases" href="#">Download</a></li></ul></div></nav>
 
 <header class="hero wrap" id="top">
-  <div class="logo"><div class="ring"></div>
-    <svg viewBox="0 0 100 100"><rect x="4" y="4" width="92" height="92" rx="26" fill="url(#lg)"/><rect x="5" y="5" width="90" height="90" rx="25" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.4"/>
-    <rect class="sq s3" x="51" y="20" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/><rect class="sq s4" x="20" y="51" width="29" height="29" rx="7" fill="#000" fill-opacity=".28"/>
-    <rect class="sq s1" x="20" y="20" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/><rect class="sq s2" x="51" y="51" width="29" height="29" rx="7" fill="#fff" fill-opacity=".93"/></svg></div>
-  <h1><span class="w">Root,</span> <span class="w">dressed</span> <span class="w">in <b>glass.</b></span></h1>
-  <p class="tag" id="tag"></p>
-  <div class="cta"><a class="btn p" data-link="releases" href="#">⬇ Download</a><a class="btn" data-link="group" href="#">💬 Join Telegram</a><a class="btn" data-link="github" href="#">GitHub</a></div>
-  <div class="pal"><small>Tap a colour: this page changes, just like the app</small><div class="dots" id="dots"></div><div class="pname" id="pname"></div></div>
+  <div class="txt">
+    <img class="logo" data-rc src="img/logo.png" alt="DarkNightSu logo" width="92" height="92">
+    <span class="badge"><i></i><span>Latest release <b class="ver">v9.3.0</b></span></span>
+    <h1>Kernel root,<br>dressed in <b>glass.</b></h1>
+    <p class="tag" id="tag"></p>
+    <div class="cta"><a class="btn p" data-link="releases" href="#"><svg><use href="#i-dl"/></svg>Download</a><a class="btn" data-link="group" href="#"><svg><use href="#i-tg"/></svg>Join Telegram</a><a class="btn" data-link="github" href="#"><svg><use href="#i-gh"/></svg>GitHub</a></div>
+    <div class="pal"><small>Pick a colour — this page and every screenshot re-theme live, just like the manager.</small><div class="dots" data-dots></div><div class="pname" data-pname></div></div>
+  </div>
+  <div class="ph0"><div class="heroph" data-tilt><img data-rc src="img/home.jpg" alt="DarkNightSu home screen" width="538" height="1200"></div></div>
 </header>
 
 <main class="wrap">
+<div class="stats rv">
+  <div class="stat"><b>10</b><span>live palettes</span></div>
+  <div class="stat"><b>8</b><span>toggle styles</span></div>
+  <div class="stat"><b>GKI + non-GKI</b><span>LKM or AnyKernel3</span></div>
+  <div class="stat"><b>arm64 · armv7</b><span>+ universal APK</span></div>
+  <div class="stat"><b>SuSFS · KPM</b><span>kernel extensions</span></div>
+</div>
+
+<!-- ============ SCREENS ============ -->
+<section id="screens"><span class="eye rv">Screenshots</span><h2 class="rv">See it for yourself.</h2>
+<p class="sub rv">Real screenshots from a real phone running <b>v9.3.0</b>. Swipe through them, tap one to enlarge — and pick a palette: the screenshots take on that colour, exactly like the app does.</p>
+<div class="palbar rv"><small>Palette</small><div class="dots" data-dots></div><span class="pname" data-pname></span></div>
+<div class="carwrap rv">
+  <button class="arr l" id="prev" aria-label="Previous screenshot"><svg><use href="#i-l"/></svg></button>
+  <button class="arr r" id="next" aria-label="Next screenshot"><svg><use href="#i-r"/></svg></button>
+  <div class="rail" id="rail" tabindex="0" aria-label="App screenshots">
+    <figure class="shot"><button class="ph" aria-label="Enlarge Home screenshot"><img data-rc src="img/home.jpg" alt="Home screen with kernel status, DarkTune and DarkNight Toolbox" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Home</b><span>Kernel status, DarkTune and DarkNight Toolbox at a glance.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Root compatibility checker screenshot"><img data-rc src="img/checker.jpg" alt="Install screen with the root compatibility check" width="470" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Root compatibility checker</b><span>Check your phone first: it recommends the safest install method.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Modules screenshot"><img data-rc src="img/modules.jpg" alt="Module list" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Modules</b><span>Enable, run Action, open the WebUI or uninstall.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Toolbox Performance screenshot"><img data-rc src="img/toolbox-performance.jpg" alt="DarkNight Toolbox performance tab" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Toolbox · Performance</b><span>Global kernel profiles and a per-app auto-profile daemon.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Toolbox Charging screenshot"><img data-rc src="img/toolbox-charging.jpg" alt="DarkNight Toolbox charging tab" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Toolbox · Charging</b><span>Battery telemetry, bypass charging and a smart charge limit.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge DarkTune screenshot"><img data-rc src="img/darktune.jpg" alt="DarkTune kernel tuning" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>DarkTune</b><span>Search tunables, export / import setups and save snapshots.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Extension features screenshot"><img data-rc src="img/extensions.jpg" alt="Extension features list" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Extension features</b><span>KPM, CPU identity spoofing, umount paths, dynamic managers, SuSFS.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Settings screenshot"><img data-rc src="img/settings.jpg" alt="Settings screen" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Settings</b><span>UI style, language, Theme, Theme store, side info bar, App Profile.</span></figcaption></figure>
+    <figure class="shot"><button class="ph" aria-label="Enlarge Theme studio screenshot"><img data-rc src="img/theme-studio.jpg" alt="Theme studio with toggle styles" width="538" height="1200" loading="lazy" decoding="async"></button><figcaption><b>Theme studio</b><span>Colours, background, icon &amp; text, home card, bottom bar, gestures, 8 toggle styles.</span></figcaption></figure>
+  </div>
+</div>
+<div class="pager" id="pager"></div>
+<p class="hint">← Swipe or drag →</p>
+</section>
+
+<!-- ============ FEATURES ============ -->
 <section id="features"><span class="eye rv">Features</span><h2 class="rv">Powerful inside. Personal outside.</h2><p class="sub rv">Kernel-based root with a design you can actually make your own.</p>
 <div class="cards">
-<div class="card rv"><div class="ic">🎨</div><h3>10 live palettes</h3><p>Logo, splash, toggles and icons all follow the colour you pick.</p></div>
-<div class="card rv"><div class="ic">🧊</div><h3>Frosted-glass UI</h3><p>Glass cards, a floating pill dock or sidebar, Material 3 and Miuix styles.</p></div>
-<div class="card rv"><div class="ic">🛠️</div><h3>Kernel toolbox</h3><p>Game profiles, bypass charge, integrity hub, live logs, rescue, plus DarkTune.</p></div>
-<div class="card rv"><div class="ic">🛡️</div><h3>Per-app root</h3><p>Kernel-based su with App Profile and temporary grants. SUSFS hiding built in.</p></div>
-<div class="card rv"><div class="ic">📦</div><h3>Flash &amp; patch</h3><p>LKM, boot image patching, AnyKernel3 zips and KPM, all from one Install screen.</p></div>
-<div class="card rv"><div class="ic">🚀</div><h3>Made to feel good</h3><p>Aurora startup, first-run onboarding and a live info bar for CPU, battery and temperature.</p></div>
+<div class="card rv"><div class="ic">🎨</div><h3>10 live palettes</h3><p>DarkNight Aura, Royal Violet, Crimson Noir, Forest Noir, Golden Bronze, Cyber Ocean, Amber Glow, Royal Ember, Mint Aurora and Royal Charcoal. Logo, glass and toggles follow your pick.</p></div>
+<div class="card rv"><div class="ic">🧊</div><h3>Frosted-glass UI</h3><p>Glass cards and a floating pill dock, in Material 3 and Miuix styles. Theme Studio controls colours, background, home card, bottom bar and gestures.</p></div>
+<div class="card rv"><div class="ic">🔍</div><h3>Root compatibility checker</h3><p>Reads your kernel, boot image and partitions, then recommends GKI LKM patching or an AnyKernel3 kernel. Optional deep check with root.</p></div>
+<div class="card rv"><div class="ic">🛠️</div><h3>DarkNight Toolbox</h3><p>Game profiles, per-app auto profiles, bypass charging, smart charge limit, Integrity Hub, live logs and rescue tools.</p></div>
+<div class="card rv"><div class="ic">🎛️</div><h3>DarkTune</h3><p>Search kernel tunables, TCP congestion control, export or import a setup, snapshots and restore. Apply on boot is optional.</p></div>
+<div class="card rv"><div class="ic">🛡️</div><h3>SuSFS &amp; KPM</h3><p>Hide-mount, uname spoofing, redirect-open and more via SuSFS (needs a SuSFS kernel), plus KPM, CPU identity spoofing and umount path management.</p></div>
+<div class="card rv"><div class="ic">📦</div><h3>Flash, patch &amp; extract</h3><p>Patch a boot image, flash AnyKernel3 zips, use a local LKM, and extract boot, init_boot or recovery to your Download folder as a backup.</p></div>
+<div class="card rv"><div class="ic">🏪</div><h3>Theme store</h3><p>Browse, submit and apply online themes straight from Settings, plus a live side info bar for CPU, battery and temperature.</p></div>
+<div class="card rv"><div class="ic">🧩</div><h3>Modules &amp; App Profile</h3><p>Manage modules with Action and WebUI, and give each app its own root profile or template.</p></div>
 </div></section>
 
-<section id="screens"><span class="eye rv">Screens</span><h2 class="rv">See it for yourself.</h2>
-<div class="phones rv"><div class="phone" data-tilt><img src="img/home.jpg" alt="DarkNightSu home screen" loading="lazy"></div><div class="phone" data-tilt><img src="img/install.jpg" alt="DarkNightSu install screen" loading="lazy"></div></div>
-<p class="cap rv">Home and Install on a real device, Aura palette.</p></section>
+<!-- ============ CHECKER ============ -->
+<section id="checker"><div class="split">
+<div>
+<span class="eye rv">Root compatibility checker</span><h2 class="rv">Will it work on my phone?</h2>
+<p class="sub rv" style="margin-bottom:18px">Open <b>Install</b> and tap <b>Check my device</b>. DarkNightSu inspects your phone and tells you — in plain words — what is safe, what is risky and which method to use.</p>
+<div class="chips rv"><span class="chip"><b>Android</b> &amp; SDK</span><span class="chip"><b>ABI</b> arm64 / armv7</span><span class="chip"><b>Kernel</b> version &amp; arch</span><span class="chip"><b>Boot image</b> header v0–v4</span><span class="chip"><b>Partitions</b> boot · init_boot · recovery</span><span class="chip"><b>Bootloader</b> state</span><span class="chip"><b>SuSFS</b> / KPM</span><span class="chip"><b>Vendor protection</b> (e.g. Samsung RKP)</span></div>
+<div class="sev rv"><span class="ok">OK</span><span class="in">INFO</span><span class="wa">WARN</span><span class="ri">RISK</span><span class="bl">BLOCK</span></div>
+<div class="flow">
+<div class="fl rv"><i>1</i><b>Check</b><span>Quick check, or turn on <b>Deep check</b> to use root for kernel config, logs and partitions.</span></div>
+<div class="fl rv"><i>2</i><b>Verdict</b><span>Items are sorted by severity. Dangerous ones always stay visible; the rest can be expanded.</span></div>
+<div class="fl rv"><i>3</i><b>Recommended</b><span>One clear method, ready in <b>Quick start</b>. Not sure about something? Use <b>I know my device</b> to override.</span></div>
+</div>
+</div>
+<div class="visual rv"><div class="heroph" data-tilt><img data-rc src="img/checker.jpg" alt="Root compatibility check card in the Install screen" width="470" height="1200" loading="lazy" decoding="async"></div></div>
+</div>
 
-<section id="compat"><span class="eye rv">Compatibility</span><h2 class="rv">Will it run on my phone?</h2><p class="sub rv">It depends on your <b>kernel</b>, not the app.</p>
-<div class="tw rv"><table><tr><th>Device</th><th>Method</th><th>Notes</th></tr>
-<tr><td>GKI (kernel 5.10+)</td><td>LKM / boot patch</td><td>Recommended. Use the <code>.ko</code> that matches your KMI.</td></tr>
-<tr><td>Non-GKI (4.14+)</td><td>Custom kernel</td><td>Integrate DarkNightSu into your kernel source and build it.</td></tr>
-<tr><td>KPM</td><td><code>CONFIG_KPM=y</code></td><td>64-bit kernels. Non-GKI also needs <code>CONFIG_KALLSYMS_ALL=y</code>.</td></tr></table></div>
-<div class="warn rv"><b>⚠ Read this.</b> If your phone's kernel does not support kernel root, stay away. DarkNightSu can't force root onto an unsupported kernel, and a wrong flash can brick your device. Always back up your original boot image.</div></section>
+<div class="helper rv"><h3>Which image do I patch?</h3><p class="s">A quick guide before you open the app. The in-app checker reads the real partitions on your phone, so trust it over this table.</p>
+<div class="sel"><div><label for="k">Kernel type</label><select id="k"><option value="u">I'm not sure</option><option value="g">GKI — kernel 5.10+, boot header v3 / v4</option><option value="n">Non-GKI — older kernel, boot header v0–v2</option></select></div>
+<div><label for="a">Phone launched with</label><select id="a"><option value="n">Android 13 or newer</option><option value="o">Android 12 or older</option></select></div></div>
+<div class="res" id="res"></div></div>
 
-<section id="install"><span class="eye rv">Install</span><h2 class="rv">Three steps.</h2>
-<div class="steps"><div class="step rv"><b>Get a compatible kernel</b><p>Flash a supported kernel, or load the LKM or patch your <code>boot.img</code> from the manager.</p></div>
-<div class="step rv"><b>Install the APK</b><p>Only the official <code>-release.apk</code> from Releases. Debug and CI builds are rejected by the kernel.</p></div>
-<div class="step rv"><b>Open and personalise</b><p>Pick your palette, UI style and dock. Done.</p></div></div>
-<div class="cta2 rv"><h2>Get DarkNightSu</h2><p class="sub" style="margin:0 auto 22px">Questions, bugs or ideas? The community and the developer are on Telegram.</p>
-<div class="cta"><a class="btn p" data-link="releases" href="#">⬇ Download</a><a class="btn" data-link="group" href="#">💬 Telegram group</a><a class="btn" data-link="dev" href="#">👤 Contact developer</a><a class="btn" data-link="drive" href="#" id="drv">☁ Drive mirror</a></div></div></section>
+<div class="tw rv"><table><tr><th>Phone</th><th>Method in DarkNightSu</th><th>Notes</th></tr>
+<tr><td>GKI (kernel 5.10+, boot header v3/v4)</td><td>Select a file and patch (LKM)</td><td>Patch <code>init_boot.img</code> if the phone launched with Android 13+, otherwise <code>boot.img</code>. Use the LKM that matches your KMI.</td></tr>
+<tr><td>Non-GKI (4.x kernels, header v0–v2)</td><td>AnyKernel3 kernel zip</td><td>The kernel needs DarkNightSu built in. Boot-image patching is not possible. Build your own with <code>kernel/setup.sh</code>.</td></tr>
+<tr><td>KPM</td><td><code>CONFIG_KPM=y</code></td><td>Needs a KPM-capable kernel. Non-GKI also needs <code>CONFIG_KALLSYMS_ALL=y</code>.</td></tr>
+<tr><td>SuSFS</td><td>SuSFS kernel</td><td>Needs a kernel built with SuSFS. The manager shows its version once it is active.</td></tr>
+<tr><td>Architectures</td><td>arm64-v8a · armeabi-v7a · universal</td><td>Pick the APK that matches your phone, or the universal build.</td></tr></table></div>
+<div class="warn rv"><b>⚠ Heuristic, not a guarantee.</b> Properties and <code>uname</code> can be spoofed, so the checker cross-checks several signals and marks uncertain things as <b>RISK</b> instead of blocking you. DarkNightSu can't force root onto a kernel that doesn't support it, and a wrong flash can brick your phone. Always back up your original boot image first — the Install screen has an Extract tool for that.</div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section id="install"><span class="eye rv">Install</span><h2 class="rv">Four easy steps.</h2>
+<div class="steps"><div class="step rv"><b>Install the APK</b><p>Download the official <code>-release.apk</code> for your phone from Releases. Debug and CI builds are rejected by the kernel.</p></div>
+<div class="step rv"><b>Check your phone</b><p>Open Install → <b>Check my device</b>. Read the verdict and the recommended method.</p></div>
+<div class="step rv"><b>Quick start</b><p>Tap <b>Quick start</b> to pick the recommended method, then <b>Next</b>. Back up your boot image first.</p></div>
+<div class="step rv"><b>Reboot &amp; personalise</b><p>Open the manager, pick a palette, UI style and dock. Done.</p></div></div>
+<div class="codebox rv"><div class="h"><span>Own kernel? Add DarkNightSu to your kernel source</span><button class="copy" data-copy="#cmd">Copy</button></div><pre id="cmd">curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s main</pre></div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq"><span class="eye rv">FAQ</span><h2 class="rv">Good to know.</h2>
+<details class="rv"><summary>My phone says the bootloader is locked but I unlocked it.</summary><p>Spoofing modules (integrity, uname) change what apps can read, so the checker can't fully trust it. It shows a RISK instead of blocking you, and "I know my device" lets you tell it the truth.</p></details>
+<details class="rv"><summary>Do I patch boot.img on a non-GKI phone?</summary><p>No. Boot-image patching (LKM) needs a GKI kernel. On non-GKI phones flash an AnyKernel3 zip with DarkNightSu built into the kernel, or build your own kernel.</p></details>
+<details class="rv"><summary>Which partition: init_boot or boot?</summary><p>It follows how the phone launched. Phones that launched with Android 13+ usually have an <code>init_boot</code> partition; older ones use <code>boot</code>. The checker reads the real partition list.</p></details>
+<details class="rv"><summary>Why do I need a special kernel for KPM or SuSFS?</summary><p>They are kernel features. The kernel must be built with <code>CONFIG_KPM</code> or with the SuSFS patches; the manager only controls them.</p></details>
+<details class="rv"><summary>Where do I report a bug?</summary><p>Use the <b>Issues</b> topic in the Telegram group, or open a GitHub issue. In the app, <b>Send logs</b> shares the report and points you to the topic.</p></details>
+</section>
+
+<!-- ============ COMMUNITY ============ -->
+<section id="community"><span class="eye rv">Community &amp; links</span><h2 class="rv">Say hi.</h2><p class="sub rv">Questions, bugs, ideas or a new theme? The community and the developer are one tap away.</p>
+<div class="links">
+<a class="lk rv" data-link="releases" href="#"><div class="i"><svg><use href="#i-dl"/></svg></div><div><b>Download</b><span>Latest release on GitHub</span></div></a>
+<a class="lk rv" data-link="group" href="#"><div class="i"><svg><use href="#i-tg"/></svg></div><div><b>Telegram group</b><span>t.me/darknightsu</span></div></a>
+<a class="lk rv" data-link="issues" href="#"><div class="i"><svg><use href="#i-bug"/></svg></div><div><b>Report a bug</b><span>Issues topic in the group</span></div></a>
+<a class="lk rv" data-link="dev" href="#"><div class="i"><svg><use href="#i-user"/></svg></div><div><b>Contact developer</b><span>Telegram · @Max_araf_2010</span></div></a>
+<a class="lk rv" data-link="github" href="#"><div class="i"><svg><use href="#i-gh"/></svg></div><div><b>DarkNightSu on GitHub</b><span>Source, releases, docs</span></div></a>
+<a class="lk rv" data-link="profile" href="#"><div class="i"><svg><use href="#i-user"/></svg></div><div><b>max-araf on GitHub</b><span>Developer profile</span></div></a>
+<a class="lk rv" data-link="ghissues" href="#"><div class="i"><svg><use href="#i-tag"/></svg></div><div><b>GitHub issues</b><span>Track bugs &amp; requests</span></div></a>
+<a class="lk rv" data-link="drive" href="#"><div class="i"><svg><use href="#i-cloud"/></svg></div><div><b>Drive mirror</b><span>Alternative download</span></div></a>
+</div>
+<div class="cta2 rv"><h2>Get DarkNightSu <span class="ver" style="color:var(--a)">v9.3.0</span></h2><p class="sub" style="margin:0 auto 22px">Free and open source. Back up your boot image, then enjoy kernel root in glass.</p>
+<div class="cta"><a class="btn p" data-link="releases" href="#"><svg><use href="#i-dl"/></svg>Download</a><a class="btn" data-link="group" href="#"><svg><use href="#i-tg"/></svg>Telegram group</a><a class="btn" data-link="dev" href="#"><svg><use href="#i-user"/></svg>Contact developer</a></div></div>
+</section>
 </main>
 
-<footer><div class="wrap">Made with ❤ by <a data-link="dev" href="#">max-araf</a> · <a data-link="github" href="#">GitHub</a> · <a data-link="group" href="#">Telegram</a><br><span style="font-size:13px">Built on open-source KazeSU (SukiSU Nova, SukiSU-Ultra, KernelSU, KernelPatch, susfs). GPL-3.0.</span></div></footer>
+<footer><div class="wrap">Made with ❤ by <a data-link="profile" href="#">max-araf</a> · <a data-link="github" href="#">GitHub</a> · <a data-link="group" href="#">Telegram</a><br><span style="font-size:13px">Built on open-source KazeSU (SukiSU Nova, SukiSU-Ultra, KernelSU, KernelPatch, susfs). Manager GPL-3.0-or-later, kernel GPL-2.0-only.</span></div></footer>
+
+<!-- lightbox -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+  <button class="x" id="lbx" aria-label="Close">×</button>
+  <button class="arr l" id="lbp" aria-label="Previous"><svg><use href="#i-l"/></svg></button>
+  <button class="arr r" id="lbn" aria-label="Next"><svg><use href="#i-r"/></svg></button>
+  <figure><img id="lbi" alt=""><figcaption><b id="lbt"></b><span id="lbs"></span></figcaption></figure>
+</div>
 
 <script>
 /* ===== EDIT YOUR LINKS HERE ===== */
 const LINKS={
   github:"https://github.com/max-araf/DarkNightSu",
   releases:"https://github.com/max-araf/DarkNightSu/releases/latest",
+  ghissues:"https://github.com/max-araf/DarkNightSu/issues",
+  profile:"https://github.com/max-araf",
   group:"https://t.me/darknightsu",
+  issues:"https://t.me/darknightsu/8",
   dev:"https://t.me/Max_araf_2010",
-  drive:""   // paste your Drive link here; the button hides itself while it is empty
+  drive:""   // paste a Drive link here; the card hides itself while it is empty
 };
-document.querySelectorAll("[data-link]").forEach(a=>{const u=LINKS[a.dataset.link];if(u)a.href=u;else a.style.display="none"});
+document.querySelectorAll("[data-link]").forEach(a=>{const u=LINKS[a.dataset.link];if(u){a.href=u;if(/^https?:/.test(u)){a.target="_blank";a.rel="noopener"}}else a.style.display="none"});
 
-const PALS=[["DarkNight Aura","#2563FF"],["Royal Violet","#9303C5"],["Crimson Noir","#E0194D"],["Forest Noir","#12A62A"],["Golden Bronze","#FFD84D"],["Cyber Ocean","#00BBFF"],["Amber Glow","#FEB42F"],["Royal Ember","#07A57C"],["Mint Aurora","#07D0A4"],["Royal Charcoal","#7D8088"]];
-const dots=document.getElementById("dots"),pn=document.getElementById("pname");
-function setPal(i,save){document.documentElement.style.setProperty("--a",PALS[i][1]);pn.textContent=PALS[i][0];[...dots.children].forEach((b,j)=>b.classList.toggle("on",i===j));if(save)try{localStorage.setItem("dn_pal",i)}catch(e){}}
-PALS.forEach((p,i)=>{const b=document.createElement("button");b.style.setProperty("--c",p[1]);b.title=p[0];b.setAttribute("aria-label",p[0]);b.onclick=()=>setPal(i,1);dots.appendChild(b)});
-let s=0;try{s=+localStorage.getItem("dn_pal")||0}catch(e){}setPal(s);
+/* latest version label (falls back to the text in the page) */
+fetch("https://api.github.com/repos/max-araf/DarkNightSu/releases/latest").then(r=>r.ok?r.json():null).then(j=>{if(j&&j.tag_name)document.querySelectorAll(".ver").forEach(e=>e.textContent=j.tag_name)}).catch(()=>{});
+
+/* ===== palettes (same 10 as the manager) ===== */
+const PALS=[
+ {n:"DarkNight Aura",a:"#2F6BFF",bg:"#07090F",s:1},
+ {n:"Royal Violet",a:"#A81FD6",bg:"#0A0712",s:1},
+ {n:"Crimson Noir",a:"#E02A55",bg:"#0F070A",s:1},
+ {n:"Forest Noir",a:"#1AA63A",bg:"#050D07",s:.95},
+ {n:"Golden Bronze",a:"#E5C158",bg:"#171008",s:.95},
+ {n:"Cyber Ocean",a:"#00BBFF",bg:"#000221",s:1},
+ {n:"Amber Glow",a:"#FEB42F",bg:"#0E0B06",s:1},
+ {n:"Royal Ember",a:"#0CA67B",bg:"#04252C",s:.95},
+ {n:"Mint Aurora",a:"#07D0A4",bg:"#04120F",s:1},
+ {n:"Royal Charcoal",a:"#7B7E84",bg:"#18191C",s:.08}
+];
+function hueOf(hex){const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d)return 220;let h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;return h<0?h+360:h}
+PALS.forEach(p=>p.h=hueOf(p.a));
+const BASE_H=224; /* hue of the blue used in the original screenshots */
+
+/* recolour: shift only the blue/navy pixels, keep whites, greens, pinks, yellows as they are */
+function recolor(img,pal){
+  const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,c=document.createElement("canvas");c.width=w;c.height=h;
+  const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);
+  const id=x.getImageData(0,0,w,h),d=id.data,dh=pal.h-BASE_H,sm=pal.s;
+  for(let i=0;i<d.length;i+=4){
+    const r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255;
+    const mx=r>g?(r>b?r:b):(g>b?g:b),mn=r<g?(r<b?r:b):(g<b?g:b),dl=mx-mn;
+    if(dl<.03)continue;
+    const l=(mx+mn)/2,s=dl/(1-Math.abs(2*l-1));
+    let hh=mx===r?((g-b)/dl)%6:mx===g?(b-r)/dl+2:(r-g)/dl+4;hh*=60;if(hh<0)hh+=360;
+    let wh=hh>=195&&hh<=260?1:hh>=170&&hh<195?(hh-170)/25:hh>260&&hh<=290?(290-hh)/30:0;
+    if(!wh)continue;
+    let ws=(s-.1)/.15;ws=ws<0?0:ws>1?1:ws;const wt=wh*ws;if(!wt)continue;
+    let nh=(hh+dh*wt+360)%360,ns=s*(1+wt*(sm-1));if(ns>1)ns=1;
+    const cc=(1-Math.abs(2*l-1))*ns,xx=cc*(1-Math.abs((nh/60)%2-1)),m=l-cc/2;
+    let R,G,B;const k=nh/60|0;
+    if(k===0){R=cc;G=xx;B=0}else if(k===1){R=xx;G=cc;B=0}else if(k===2){R=0;G=cc;B=xx}else if(k===3){R=0;G=xx;B=cc}else if(k===4){R=xx;G=0;B=cc}else{R=cc;G=0;B=xx}
+    d[i]=(R+m)*255;d[i+1]=(G+m)*255;d[i+2]=(B+m)*255;
+  }
+  x.putImageData(id,0,0);return c;
+}
+const RC=[...document.querySelectorAll("img[data-rc]")];
+RC.forEach(im=>{im.dataset.src0=im.getAttribute("src")});
+let curPal=0,token=0,blobs=new Map();
+function applyImages(i){
+  const my=++token,pal=PALS[i];
+  RC.forEach(im=>{im.style.filter=""});
+  if(i===0){RC.forEach(im=>{im.src=im.dataset.src0});return}
+  /* visible images first */
+  const vis=[],rest=[];RC.forEach(im=>{const r=im.getBoundingClientRect();(r.bottom>-300&&r.top<innerHeight+300&&r.right>-300&&r.left<innerWidth+300?vis:rest).push(im)});
+  const q=vis.concat(rest);
+  (function next(){
+    if(my!==token)return;const im=q.shift();if(!im)return;
+    const png=/\.png$/.test(im.dataset.src0),fb=()=>{im.src=im.dataset.src0;im.style.filter="hue-rotate("+(pal.h-BASE_H)+"deg) saturate("+(pal.s<.5?.12:1)+")"};
+    /* always recolour from the ORIGINAL file */
+    const o=new Image();
+    o.onload=()=>{
+      try{
+        const c=recolor(o,pal);
+        c.toBlob(b=>{if(my!==token||!b)return;const u=URL.createObjectURL(b),old=blobs.get(im);im.src=u;blobs.set(im,u);if(old)setTimeout(()=>URL.revokeObjectURL(old),600)},png?"image/png":"image/jpeg",.9);
+      }catch(e){fb()}
+      setTimeout(next,12);
+    };
+    o.onerror=()=>setTimeout(next,12);
+    o.src=im.dataset.src0;
+  })();
+}
+function setPal(i,save){
+  curPal=i;const p=PALS[i],r=document.documentElement.style;
+  r.setProperty("--a",p.a);r.setProperty("--bg",p.bg);document.getElementById("tc").content=p.bg;
+  document.querySelectorAll("[data-pname]").forEach(e=>e.textContent=p.n);
+  document.querySelectorAll("[data-dots]").forEach(ds=>[...ds.children].forEach((b,j)=>{b.classList.toggle("on",i===j)}));
+  if(save)try{localStorage.setItem("dn_pal",i)}catch(e){}
+  applyImages(i);
+  if(lb.classList.contains("on"))setTimeout(lbShow,350);
+}
+document.querySelectorAll("[data-dots]").forEach(ds=>PALS.forEach((p,i)=>{const b=document.createElement("button");b.style.setProperty("--c",p.a);b.title=p.n;b.setAttribute("aria-label",p.n);b.onclick=()=>setPal(i,1);ds.appendChild(b)}));
+
+/* ===== carousel ===== */
+const rail=document.getElementById("rail"),shots=[...rail.querySelectorAll(".shot")],pager=document.getElementById("pager");
+shots.forEach((s,i)=>{const b=document.createElement("button");b.setAttribute("aria-label","Screenshot "+(i+1));b.onclick=()=>goTo(i);pager.appendChild(b)});
+function nearest(){const c=rail.scrollLeft+rail.clientWidth/2;let bi=0,bd=1e9;shots.forEach((s,i)=>{const d=Math.abs(s.offsetLeft+s.offsetWidth/2-c);if(d<bd){bd=d;bi=i}});return bi}
+function mark(){const n=nearest();shots.forEach((s,i)=>s.classList.toggle("cur",i===n));[...pager.children].forEach((b,i)=>b.classList.toggle("on",i===n))}
+function goTo(i){i=Math.max(0,Math.min(shots.length-1,i));const s=shots[i];rail.scrollTo({left:s.offsetLeft-(rail.clientWidth-s.offsetWidth)/2,behavior:"smooth"})}
+let st;rail.addEventListener("scroll",()=>{cancelAnimationFrame(st);st=requestAnimationFrame(mark)},{passive:true});
+document.getElementById("prev").onclick=()=>goTo(nearest()-1);document.getElementById("next").onclick=()=>goTo(nearest()+1);
+rail.addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();goTo(nearest()+1)}if(e.key==="ArrowLeft"){e.preventDefault();goTo(nearest()-1)}});
+/* mouse drag (touch uses native swipe) */
+let dn=false,sx=0,sl=0,moved=0;
+rail.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse")return;dn=true;moved=0;sx=e.clientX;sl=rail.scrollLeft});
+addEventListener("pointermove",e=>{if(!dn)return;const dx=e.clientX-sx;moved=Math.max(moved,Math.abs(dx));if(moved>5)rail.classList.add("drag");rail.scrollLeft=sl-dx});
+addEventListener("pointerup",()=>{if(!dn)return;dn=false;if(rail.classList.contains("drag")){rail.classList.remove("drag");goTo(nearest())}});
+rail.addEventListener("click",e=>{if(moved>5){moved=0;e.preventDefault();e.stopPropagation();return}const f=e.target.closest(".shot");if(f&&e.target.closest(".ph"))openLb(shots.indexOf(f))},true);
+setTimeout(mark,50);addEventListener("resize",mark);
+
+/* ===== lightbox ===== */
+const lb=document.getElementById("lb"),lbi=document.getElementById("lbi");let li=0;
+function lbShow(){const s=shots[li];lbi.src=s.querySelector("img").currentSrc||s.querySelector("img").src;lbi.alt=s.querySelector("img").alt;document.getElementById("lbt").textContent=s.querySelector("b").textContent;document.getElementById("lbs").textContent=s.querySelector("figcaption span").textContent}
+function openLb(i){li=i;lb.classList.add("on");document.body.style.overflow="hidden";lbShow()}
+function closeLb(){lb.classList.remove("on");document.body.style.overflow="";goTo(li)}
+function lbMove(d){li=(li+d+shots.length)%shots.length;lbShow()}
+document.getElementById("lbx").onclick=closeLb;document.getElementById("lbp").onclick=()=>lbMove(-1);document.getElementById("lbn").onclick=()=>lbMove(1);
+lb.addEventListener("click",e=>{if(e.target===lb)closeLb()});
+addEventListener("keydown",e=>{if(!lb.classList.contains("on"))return;if(e.key==="Escape")closeLb();if(e.key==="ArrowRight")lbMove(1);if(e.key==="ArrowLeft")lbMove(-1)});
+let tx=0;lb.addEventListener("touchstart",e=>{tx=e.touches[0].clientX},{passive:true});lb.addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)lbMove(d<0?1:-1)});
+
+/* hero + checker phones open the right screenshot */
+document.querySelectorAll(".heroph").forEach(p=>{p.style.cursor="zoom-in";p.addEventListener("click",()=>{const src=p.querySelector("img").dataset.src0;const i=shots.findIndex(s=>s.querySelector("img").dataset.src0===src);if(i>=0)openLb(i)})});
+
+/* ===== decision helper ===== */
+const K=document.getElementById("k"),A=document.getElementById("a"),R=document.getElementById("res");
+function help(){
+  const k=K.value,a=A.value;let t,p,s="";
+  if(k==="g"){const img=a==="n"?"init_boot.img":"boot.img";t="Patch "+img;p="Install → <b>Select a file and patch</b> → choose your "+img+" (or use <b>Quick start</b>). Flash the patched image and reboot.";s=a==="n"?"Only if your phone really has an init_boot partition. Phones upgraded from Android 12 keep boot.img — the checker will tell you.":"Android 12 or older phones normally use boot.img."}
+  else if(k==="n"){t="Flash an AnyKernel3 kernel zip";p="Non-GKI phones can't use boot-image patching. Install → <b>AnyKernel3 Kernel</b> with a kernel zip that has DarkNightSu built in — or build your own kernel with <code>kernel/setup.sh</code>.";s="KPM and SuSFS also need a kernel built with them."}
+  else{t="Run the checker first";p="Open Install → <b>Check my device</b>. Turn on <b>Deep check</b> if you already have root; it reads the real boot header and partitions and then recommends one method.";s="Wrong guesses can brick a phone — let the app check."}
+  R.innerHTML="<b>"+t+"</b><p>"+p+"</p>"+(s?"<small>"+s+"</small>":"");
+}
+K.onchange=A.onchange=help;help();
+
+/* copy */
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=document.querySelector(b.dataset.copy).textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const r=document.createRange();r.selectNode(document.querySelector(b.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);try{document.execCommand("copy")}catch(e){}}).finally(()=>{b.textContent="Copied ✓";setTimeout(()=>b.textContent="Copy",1600)})});
 
 /* typing tagline */
-const T=["A kernel-based root manager for Android.","10 palettes. Frosted glass. Your kernel, your rules.","GKI, non-GKI, LKM, boot patch, KPM, SUSFS."];
+const T=["A kernel-based root manager for Android.","10 palettes. Frosted glass. Your kernel, your rules.","GKI, non-GKI, LKM, AnyKernel3, KPM and SuSFS.","Check your phone before you flash."];
 const tg=document.getElementById("tag");let ti=0,ci=0,del=false;
 (function type(){const t=T[ti];tg.innerHTML="<span>"+t.slice(0,ci)+"</span>"+'<span style="opacity:.6">|</span>';
 if(!del&&ci<t.length){ci++;setTimeout(type,38)}else if(!del){del=true;setTimeout(type,1700)}else if(ci>0){ci--;setTimeout(type,16)}else{del=false;ti=(ti+1)%T.length;setTimeout(type,300)}})();
 
-/* cursor glow + card spotlight */
+/* cursor glow, card spotlight, tilt, reveal */
 addEventListener("pointermove",e=>{const r=document.documentElement.style;r.setProperty("--mx",e.clientX+"px");r.setProperty("--my",e.clientY+"px")});
 document.querySelectorAll(".card").forEach(c=>c.addEventListener("pointermove",e=>{const b=c.getBoundingClientRect();c.style.setProperty("--cx",(e.clientX-b.left)+"px");c.style.setProperty("--cy",(e.clientY-b.top)+"px")}));
-/* phone tilt */
-document.querySelectorAll("[data-tilt]").forEach(p=>{p.addEventListener("pointermove",e=>{const b=p.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;p.style.transform=`rotateY(${x*14}deg) rotateX(${-y*14}deg)`});p.addEventListener("pointerleave",()=>p.style.transform="")});
-/* reveal */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
-document.querySelectorAll(".rv").forEach((el,i)=>{el.style.transitionDelay=(i%3)*90+"ms";io.observe(el)});
+document.querySelectorAll("[data-tilt]").forEach(p=>{p.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const b=p.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;p.style.transform=`rotateY(${x*12}deg) rotateX(${-y*12}deg)`});p.addEventListener("pointerleave",()=>p.style.transform="")});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll(".rv").forEach((el,i)=>{el.style.transitionDelay=(i%3)*80+"ms";io.observe(el)});
 /* stars */
 (function(){const c=document.getElementById("st"),x=c.getContext("2d");let w,h,P=[];function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=Array.from({length:Math.min(70,w/14|0)},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.4+.3,v:Math.random()*.15+.03,a:Math.random()*.5+.2}))}
 rs();addEventListener("resize",rs);if(matchMedia("(prefers-reduced-motion:reduce)").matches){P.forEach(p=>{x.globalAlpha=p.a;x.fillStyle="#fff";x.fillRect(p.x,p.y,p.r,p.r)});return}
 (function f(){x.clearRect(0,0,w,h);for(const p of P){p.y-=p.v;if(p.y<0){p.y=h;p.x=Math.random()*w}x.globalAlpha=p.a;x.fillStyle="#fff";x.beginPath();x.arc(p.x,p.y,p.r,0,6.3);x.fill()}requestAnimationFrame(f)})()})();
+
+/* start */
+let s0=0;try{s0=+localStorage.getItem("dn_pal")||0}catch(e){}
+if(s0<0||s0>=PALS.length)s0=0;
+setPal(s0);
 </script>
 </body></html>

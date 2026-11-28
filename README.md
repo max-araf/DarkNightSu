@@ -1,131 +1,184 @@
 <div align="center">
 
-<img src="docs/DarkNightSu-logo.png" width="128" height="128" alt="DarkNightSu Logo" />
+<img src="docs/DarkNightSu-logo.png" width="128" alt="DarkNightSu logo">
 
 # DarkNightSu
 
-**A modern kernel-based root solution for Android — built for GKI & Non-GKI, dressed in frosted glass.**
+**Kernel root manager for Android — dressed in glass.**
 
-[Website](https://max-araf.github.io/DarkNightSu/) · [Releases](https://github.com/max-araf/DarkNightSu/releases) · [Telegram Group](https://t.me/darknightsu) · [Report Issues](https://t.me/darknightsu/8) · [Developer](https://t.me/Max_araf_2010)
+Frosted-glass UI · 10 live palettes · DarkNight Toolbox · DarkTune · SuSFS · KPM · built-in root compatibility checker
 
-[![Release](https://img.shields.io/github/v/release/max-araf/DarkNightSu?style=for-the-badge&color=2563FF)](https://github.com/max-araf/DarkNightSu/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/max-araf/DarkNightSu/total?style=for-the-badge&color=00BBFF)](https://github.com/max-araf/DarkNightSu/releases)
-[![Build](https://img.shields.io/github/actions/workflow/status/max-araf/DarkNightSu/build-manager.yml?style=for-the-badge&label=Build)](https://github.com/max-araf/DarkNightSu/actions)
-[![License](https://img.shields.io/badge/License-GPLv3-blue?style=for-the-badge)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/max-araf/DarkNightSu?label=Release&logo=github&color=2F6BFF)](https://github.com/max-araf/DarkNightSu/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/max-araf/DarkNightSu/total?label=Downloads&logo=github&color=2F6BFF)](https://github.com/max-araf/DarkNightSu/releases)
+[![Telegram](https://img.shields.io/badge/Telegram-Group-26A5E4?logo=telegram&logoColor=white)](https://t.me/darknightsu)
+[![Website](https://img.shields.io/badge/Website-live-2F6BFF?logo=githubpages&logoColor=white)](https://max-araf.github.io/DarkNightSu/)
+[![Kernel: GPL v2](https://img.shields.io/badge/Kernel-GPL%20v2-orange.svg?logo=gnu)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![Manager: GPL v3](https://img.shields.io/github/license/max-araf/DarkNightSu?label=Manager&logo=gnu)](/LICENSE)
+
+[**⬇ Download**](https://github.com/max-araf/DarkNightSu/releases/latest) ·
+[**🌐 Website**](https://max-araf.github.io/DarkNightSu/) ·
+[**💬 Telegram group**](https://t.me/darknightsu) ·
+[**🐞 Report a bug**](https://t.me/darknightsu/8) ·
+[**👤 Developer**](https://t.me/Max_araf_2010)
+
+<img src="site/img/og.png" alt="DarkNightSu" width="860">
 
 </div>
 
 ---
 
-**DarkNightSu** is a standalone, open-source kernel-based root manager and kernel integration suite maintained by **[MAX ARAF](https://github.com/max-araf)**. It combines kernel-level root access (`LKM` for GKI 2.0 + built-in kernel integration for Non-GKI) with a redesigned frosted-glass Manager supporting both **Material 3** and **Miuix** skins, 10 dynamic colour palettes, a guided Install flow, a built-in compatibility checker, and a raw boot image extractor.
+DarkNightSu is a kernel-based root solution built on [KazeSU](https://github.com/KazeSU/KazeSU)
+(→ SukiSU Nova → SukiSU-Ultra → KernelSU). The kernel does the work; the manager does everything
+around it — with a frosted-glass interface you can recolour, a kernel toolbox, and a checker that
+tells you **before you flash** whether your phone is a good fit.
 
 > [!IMPORTANT]
-> Install only the official signed APK from the [Releases](https://github.com/max-araf/DarkNightSu/releases) page (or the official [Telegram Manager topic](https://t.me/darknightsu/2)). Debug and PR builds use a different signing key and will not be recognized as the official manager by the kernel.
+> Install only the official manager APK from [Releases](https://github.com/max-araf/DarkNightSu/releases) —
+> the file whose name ends in `-release.apk`. Debug, PR and CI builds use a different certificate and
+> the kernel rejects them as unofficial.
 
 > [!WARNING]
-> Flashing the wrong `init_boot.img` or `boot.img` can cause a bootloop. Always back up your stock boot image first using **Backup and tools → Extract boot image** (or from your device's stock firmware).
+> If your phone's kernel does not support kernel root, **do not use this**. The manager cannot force
+> root onto an unsupported kernel, and flashing a wrong image can brick your phone.
+> **Always back up your original boot image first** (Install → Backup and tools → Extract).
 
----
+## Screenshots
 
-## Highlights (v9.3.0)
+<table>
+  <tr>
+    <td align="center"><img src="site/img/home.jpg" width="200"><br><sub><b>Home</b></sub></td>
+    <td align="center"><img src="site/img/checker.jpg" width="175"><br><sub><b>Root compatibility checker</b></sub></td>
+    <td align="center"><img src="site/img/modules.jpg" width="200"><br><sub><b>Modules</b></sub></td>
+    <td align="center"><img src="site/img/theme-studio.jpg" width="200"><br><sub><b>Theme studio</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="site/img/toolbox-performance.jpg" width="200"><br><sub><b>Toolbox · Performance</b></sub></td>
+    <td align="center"><img src="site/img/toolbox-charging.jpg" width="200"><br><sub><b>Toolbox · Charging</b></sub></td>
+    <td align="center"><img src="site/img/darktune.jpg" width="200"><br><sub><b>DarkTune</b></sub></td>
+    <td align="center"><img src="site/img/extensions.jpg" width="200"><br><sub><b>Extension features</b></sub></td>
+  </tr>
+</table>
 
-| Feature | What it does |
-| --- | --- |
-| **Frosted-Glass UI & 10 Live Palettes** | Full glass styling across **Material 3** and **Miuix** (Light + Dark + Flat mode), floating Pill Dock or Glass Sidebar, Aurora Orbit splash, and a dynamic palette-reactive **MAX** contributor badge. |
-| **Guided 2-Tap Install & Quick Start** | Clean step-by-step Install flow: *1. Check your phone → Quick Start → 2. Install* with Recommended badge, collapsible *Other methods*, *Backup and tools*, *Advanced*, and a frosted-glass pinned **Next** bar. |
-| **Root Compatibility Checker** | Quick (non-root) and Deep (root-assisted) checks across 32-bit, 64-bit, and universal devices with vendor checks (Samsung, Motorola, Xiaomi/Redmi/POCO, Infinix/Tecno/itel, OnePlus, RedMagic/Nubia, Pixel/Nothing), `"I know my device"` spoof overrides, collapsible details, and **Brick Guard** pre-flash confirmation. |
-| **Raw Boot Image Extractor** | Extracts `init_boot`, `boot`, `vendor_boot`, and `recovery` straight to `Download/DarkNightSu/` with 3-way partition size detection, header magic check, SHA-256 hash, and one-tap share. |
-| **Non-GKI & GKI Ready** | Full GKI 2.0 LKM boot patching + Non-GKI built-in kernel integration, AnyKernel3 flashing, KPM patching, and SuSFS detection (including Non-GKI/BRENE SuSFS v2.3.0). |
-| **DarkNight Toolbox & DarkTune** | Performance, Charging, Integrity, Monitor, Rescue tools, and live Side Info Bar (CPU, battery, temperature) — automatically unlocked when running a DarkNightSu kernel. |
+> Swipe through them in colour on the **[website](https://max-araf.github.io/DarkNightSu/)** — pick any of the 10 palettes and the screenshots re-theme live.
 
----
+## Highlights
 
-## Compatibility
+| | |
+|---|---|
+| 🎨 **10 live palettes** | DarkNight Aura, Royal Violet, Crimson Noir, Forest Noir, Golden Bronze, Cyber Ocean, Amber Glow, Royal Ember, Mint Aurora, Royal Charcoal. Logo, splash, glass and toggles follow your pick. |
+| 🧊 **Frosted-glass UI** | Material 3 and Miuix styles, floating pill dock or sidebar. **Theme Studio**: colours, background, icon & text, home card, bottom bar, gestures and 8 toggle styles. |
+| 🔍 **Root compatibility checker** | Reads Android/SDK, ABI, kernel, boot-image header, partitions (boot / init_boot / recovery, with sizes), bootloader state and vendor protection, then recommends one method. Optional **Deep check** with root and an **I know my device** override. |
+| 🛠️ **DarkNight Toolbox** | Global kernel profiles, per-app auto-profile daemon, bypass charging, smart charge limit, Integrity Hub, live logs, rescue. |
+| 🎛️ **DarkTune** | Search kernel tunables, TCP congestion control, export / import setups, snapshots. |
+| 🛡️ **SuSFS · KPM** | SuSFS hide-mount, uname spoofing, redirect-open (needs a SuSFS kernel); KPM, CPU identity spoofing, umount paths, dynamic managers, version overrides. |
+| 📦 **Flash · patch · extract** | Patch a boot image, flash AnyKernel3 zips, use a local LKM, extract boot / init_boot / recovery to *Download/DarkNightSu*. Guided **Quick start**. |
+| 🏪 **Theme store** | Browse, submit and apply online themes; live side info bar for CPU, battery and temperature. |
+| 🧩 **Modules & App Profile** | Module list with Action and WebUI, per-app root profiles and templates. |
 
-| Scenario | Method | Notes |
-| --- | --- | --- |
-| **GKI 2.0 devices (`5.10+` / `6.x`)** | LKM Mode | Recommended: patch `init_boot.img` (Android 13+) or `boot.img` via **Quick Start** in DarkNightSu Manager. |
-| **Non-GKI / older kernels (`4.14+` / `4.19+`)** | Kernel Integration | Integrate `DarkNightSu` directly into your kernel source tree (see below) and flash via AnyKernel3. |
-| **KPM features** | `CONFIG_KPM=y` | 64-bit (`arm64-v8a`); Non-GKI also requires `CONFIG_KALLSYMS=y` and `CONFIG_KALLSYMS_ALL=y`. |
+## Root compatibility checker
 
-**Supported Manager ABIs:** `arm64-v8a` · `armeabi-v7a` · `x86_64` · `riscv64` · `universal`
+Open **Install → Check my device**. The checker is a *heuristic*: properties and `uname` can be spoofed,
+so it cross-checks several signals and shows uncertain things as **RISK** instead of wrongly blocking you.
 
----
+| Severity | Meaning |
+|---|---|
+| **OK / INFO** | Looks fine / good to know |
+| **WARN** | Worth a look before continuing |
+| **RISK** | Might not work or could be dangerous — you decide |
+| **BLOCK** | Truly unsupported (e.g. SDK below 26, 32-bit ARM kernel) |
 
-## Kernel Integration (GKI & Non-GKI)
+What it recommends:
 
-Run this in the **root of your Linux kernel source tree** (where `drivers/` is located):
+| Your phone | Recommended method | Notes |
+|---|---|---|
+| **GKI** — kernel 5.10+, boot header v3 / v4 | *Select a file and patch* (LKM) | Patch `init_boot.img` if the phone launched with Android 13+, otherwise `boot.img` |
+| **Non-GKI** — older kernels, boot header v0–v2 | *AnyKernel3 kernel zip* | The kernel needs DarkNightSu built in; boot-image patching is not possible |
+| KPM | `CONFIG_KPM=y` | Needs a KPM-capable kernel; non-GKI also needs `CONFIG_KALLSYMS=y` and `CONFIG_KALLSYMS_ALL=y` |
+| SuSFS | SuSFS kernel | Needs a kernel built with SuSFS |
+
+Manager APKs: **arm64-v8a**, **armeabi-v7a** and **universal**.
+
+## Install
+
+1. Download the official `-release.apk` for your phone from [Releases](https://github.com/max-araf/DarkNightSu/releases/latest).
+2. Open **Install → Check my device**, read the verdict and the recommended method.
+3. Back up your boot image, tap **Quick start**, then **Next**.
+4. Reboot, open the manager and make it yours (Settings → Theme).
+
+## Kernel integration
+
+Run this in the **root of your kernel source**:
 
 ```bash
 curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s main
 ```
 
-Or pin a specific release tag (e.g. `v9.3.0`):
+`setup.sh` also accepts `--cleanup`, `--submodule` or a specific commit / tag instead of `main`.
+Then enable `CONFIG_KSU`, and `CONFIG_KPM` on 64-bit kernels for KPM. Full guide: [DARKNIGHT_SETUP.md](DARKNIGHT_SETUP.md).
+
+## Build
 
 ```bash
-curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s v9.3.0
+just bm   # cross-build ksud (aarch64) + bundled debug manager APK
+just bk   # ksud only
 ```
 
-**Other setup options:**
-- **Add as Git submodule:**
-  ```bash
-  curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s -- --submodule
-  ```
-- **Remove / clean up:**
-  ```bash
-  curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s -- --cleanup
-  ```
+`ksud` is built with [`cross`](https://github.com/cross-rs/cross); the manager is a Gradle/Kotlin project under `manager/`.
 
-**GitHub Actions workflow step (for custom kernel CI builders):**
+## FAQ
 
-```yaml
-- name: Integrate DarkNightSu
-  run: curl -LSs "https://raw.githubusercontent.com/max-araf/DarkNightSu/main/kernel/setup.sh" | bash -s main
-```
+<details><summary><b>The checker says my bootloader is locked, but I unlocked it.</b></summary>
 
-**Required `defconfig` flags:**
-```makefile
-CONFIG_KSU=y
-CONFIG_KPROBES=y
-CONFIG_HAVE_KPROBES=y
-CONFIG_KPROBE_EVENTS=y
-# Optional (64-bit KPM support):
-# CONFIG_KPM=y
-```
+Spoofing modules (integrity, uname) change what apps can read. The checker shows a **RISK** instead of
+blocking you, and **I know my device** lets you tell it the truth.
+</details>
 
-> `kernel/Kbuild` already pins `com.darknight.ksu` and the official DarkNightSu Manager signing certificate, so kernels built with this source automatically work with DarkNightSu Manager out of the box.
+<details><summary><b>Do I patch boot.img on a non-GKI phone?</b></summary>
 
----
+No. Boot-image patching (LKM) needs a GKI kernel. On non-GKI phones flash an AnyKernel3 zip with
+DarkNightSu built into the kernel, or build your own kernel with `kernel/setup.sh`.
+</details>
 
-## Community & Support
+<details><summary><b>init_boot or boot?</b></summary>
 
-Join the official **DARKNIGHT** Telegram Forum ([t.me/darknightsu](https://t.me/darknightsu)):
+It follows how the phone launched. Phones that launched with Android 13+ usually have `init_boot`;
+older ones use `boot`. The checker reads the real partition list.
+</details>
 
-| Topic | Link | Purpose |
-| --- | --- | --- |
-| **Manager** | [t.me/darknightsu/2](https://t.me/darknightsu/2) | Official signed DarkNightSu Manager APKs |
-| **Manager - Spoofed** | [t.me/darknightsu/3](https://t.me/darknightsu/3) | Spoofed package builds |
-| **Developing Manager** | [t.me/darknightsu/4](https://t.me/darknightsu/4) | CI / test builds |
-| **Changelog** | [t.me/darknightsu/5](https://t.me/darknightsu/5) | Release notes and updates |
-| **Issues** | [t.me/darknightsu/8](https://t.me/darknightsu/8) | Bug reports, compatibility reports, and logs |
+<details><summary><b>Where do I report bugs?</b></summary>
 
----
+In the **[Issues topic](https://t.me/darknightsu/8)** of the Telegram group, or as a
+[GitHub issue](https://github.com/max-araf/DarkNightSu/issues). In the app, *Send logs* shares the report and points you to the topic.
+</details>
 
-## Repository Layout
+## Repository layout
 
 | Path | Contents |
-| --- | --- |
-| `kernel/` | Kernel driver: hooks, policy, SuSFS, KPM, security, `setup.sh` |
+|---|---|
+| `kernel/` | Kernel module: hooks, policy, SuSFS, KPM, security, `setup.sh` |
 | `userspace/` | `ksud` (Rust daemon), `ksuinit`, module tooling |
-| `manager/` | DarkNightSu Manager Android app (Jetpack Compose, Material 3 & Miuix) |
+| `manager/` | Android manager app (Compose, Material 3 + Miuix) |
 | `uapi/` | Shared kernel/userspace headers |
-| `site/` | Official website source ([max-araf.github.io/DarkNightSu](https://max-araf.github.io/DarkNightSu/)) |
-| `.github/` | GitHub Actions CI, multi-ABI APK builds, Telegram auto-uploader |
+| `docs/` | Guides and logo assets |
+| `site/` | Website source (GitHub Pages) |
+| `.github/` | CI workflows, release assembly, Pages deploy |
 
----
+## Community
 
-## License & Credits
+[Telegram group](https://t.me/darknightsu) · [Issues topic](https://t.me/darknightsu/8) ·
+[Developer on Telegram](https://t.me/Max_araf_2010) · [max-araf on GitHub](https://github.com/max-araf)
 
-- `kernel/` is licensed under **GPL-2.0-only**.
-- Everything else in this repository is licensed under **GPL-3.0-or-later** (see [LICENSE](LICENSE)).
-- Built with appreciation for the open-source Android kernel root ecosystem: [KernelSU](https://github.com/tiann/KernelSU), [SukiSU-Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra), [KernelPatch](https://github.com/bmax121/KernelPatch), and [SuSFS](https://gitlab.com/simonpunk/susfs4ksu).
+## License
+
+- `kernel/` is [GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).
+- The anime `ic_launcher*` icon files from KazeSU are covered by `LICENSE_icon_English` / `LICENSE_icon_SC` — **do not reuse them**; DarkNightSu ships its own logo.
+- Everything else is [GPL-3.0-or-later](LICENSE).
+
+## Acknowledgements
+
+[KazeSU](https://github.com/KazeSU/KazeSU), [SukiSU Nova](https://github.com/SukiSU-Nova/SukiSU-Nova),
+[SukiSU-Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra), [KernelSU](https://github.com/tiann/KernelSU),
+[KernelPatch](https://github.com/bmax121/KernelPatch), [susfs](https://gitlab.com/simonpunk/susfs4ksu),
+and Kagami (Rouyashiki/YukiSU) for the magic-mount backend.
+
+<div align="center"><sub>Made by <a href="https://github.com/max-araf">max-araf</a></sub></div>
